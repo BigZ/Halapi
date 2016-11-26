@@ -42,7 +42,7 @@ class LinksRelation extends AbstractRelation implements RelationInterface
     }
 
     /**
-     * @param string $property
+     * @param \ReflectionProperty $property
      * @param object $relationContent
      * @return string|null
      * @throws \Doctrine\ORM\Mapping\MappingException

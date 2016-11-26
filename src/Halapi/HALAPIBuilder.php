@@ -14,6 +14,11 @@ use JMS\Serializer\SerializerBuilder;
 class HALAPIBuilder
 {
     /**
+     * @var RelationFactory
+     */
+    private $relationFactory;
+
+    /**
      * @var SerializerBuilder
      */
     private $serializerBuilder;

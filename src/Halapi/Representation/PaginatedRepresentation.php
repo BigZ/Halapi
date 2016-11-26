@@ -23,17 +23,17 @@ class PaginatedRepresentation
     ];
 
     /**
-     * @var string
+     * @var int
      */
     public $page;
 
     /**
-     * @var string
+     * @var int
      */
     public $limit;
 
     /**
-     * @var object
+     * @var array
      */
     public $_links;
 

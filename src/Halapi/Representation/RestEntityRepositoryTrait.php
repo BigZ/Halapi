@@ -10,6 +10,10 @@ use Doctrine\ORM\QueryBuilder;
  */
 trait RestEntityRepositoryTrait
 {
+    abstract public function getClassMetadata();
+
+    abstract public function createQueryBuilder($alias, $indexBy = null);
+
     /**
      * @param array $sorting
      * @param array $filterValues
