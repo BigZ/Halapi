@@ -58,7 +58,7 @@ class PaginationFactory
      */
     public function getRepresentation($className)
     {
-        $repository = $this->entityManager->getRepositobry($className);
+        $repository = $this->entityManager->getRepository($className);
         list($page, $limit, $sorting, $filterValues, $filerOperators) = array_values($this->addPaginationParams());
         $queryBuilder = $repository->findAllSorted($sorting, $filterValues, $filerOperators);
         $shortName = (new \ReflectionClass($className))->getShortName();
