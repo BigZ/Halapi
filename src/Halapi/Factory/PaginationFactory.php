@@ -123,12 +123,12 @@ class PaginationFactory
     /**
      * Return the url of a resource based on the 'get_entity' route name convention.
      *
-     * @param $name
+     * @param string $name
      * @param $limit
      * @param $page
      * @param $sorting
      *
-     * @return mixed
+     * @return string
      */
     private function getPaginatedRoute($name, $limit, $page, $sorting)
     {
