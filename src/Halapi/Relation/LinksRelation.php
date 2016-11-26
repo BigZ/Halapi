@@ -74,7 +74,7 @@ class LinksRelation extends AbstractRelation implements RelationInterface
      * Get the url of an entity based on the 'get_entity' route pattern.
      *
      * @param $resource
-     * @param $reflectionClass
+     * @param \ReflectionClass $reflectionClass
      *
      * @return array|void
      */
@@ -99,7 +99,7 @@ class LinksRelation extends AbstractRelation implements RelationInterface
     /**
      * Get the links of a collection.
      *
-     * @param $property
+     * @param \ReflectionProperty $property
      * @param $relationContent
      *
      * @return array|void
