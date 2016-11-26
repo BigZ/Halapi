@@ -8,6 +8,10 @@ use JMS\Serializer\SerializerBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
 
+/**
+ * Class EmbeddedRelation
+ * @author Romain Richard
+ */
 class EmbeddedRelation extends AbstractRelation implements RelationInterface
 {
     /**

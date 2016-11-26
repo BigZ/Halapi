@@ -7,6 +7,10 @@ use Halapi\Subscriber\JsonEventSubscriber;
 use JMS\Serializer\EventDispatcher\EventDispatcherInterface;
 use JMS\Serializer\SerializerBuilder;
 
+/**
+ * Class HALAPIBuilder
+ * @author Romain Richard
+ */
 class HALAPIBuilder
 {
     /**

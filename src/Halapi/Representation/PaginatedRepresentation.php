@@ -4,7 +4,7 @@ namespace Halapi\Representation;
 
 /**
  * A paginated collection representation.
- * 
+ *
  * Class PaginatedRepresentation
  */
 class PaginatedRepresentation
@@ -45,10 +45,10 @@ class PaginatedRepresentation
     /**
      * PaginatedRepresentation constructor.
      *
-     * @param $page
-     * @param $limit
-     * @param $links
-     * @param $embedded
+     * @param int   $page
+     * @param int   $limit
+     * @param array $links
+     * @param array $embedded
      */
     public function __construct($page, $limit, $links, $embedded)
     {

@@ -2,12 +2,21 @@
 
 namespace Halapi\Representation;
 
+use Doctrine\ORM\QueryBuilder;
+
 /**
  * Add a Rest features to entity repositories
  * Class RestEntityRepositoryTrait.
  */
 trait RestEntityRepositoryTrait
 {
+    /**
+     * @param array $sorting
+     * @param array $filterValues
+     * @param array $filerOperators
+     *
+     * @return QueryBuilder
+     */
     public function findAllSorted(array $sorting, array $filterValues, array $filerOperators)
     {
         $fields = array_keys($this->getClassMetadata()->fieldMappings);

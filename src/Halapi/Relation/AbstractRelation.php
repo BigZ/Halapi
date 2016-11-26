@@ -8,6 +8,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
 
+/**
+ * Class AbstractRelation
+ * @author Romain Richard
+ */
 class AbstractRelation
 {
     /**
@@ -32,7 +36,7 @@ class AbstractRelation
 
     /**
      * AbstractRelation constructor.
-     * 
+     *
      * @param RouterInterface        $router
      * @param Reader                 $annotationReader
      * @param EntityManagerInterface $entityManager

@@ -4,6 +4,11 @@ namespace Halapi\Factory;
 
 use Halapi\Relation\RelationInterface;
 
+/**
+ * Class RelationFactory.
+ *
+ * @author Romain Richard
+ */
 class RelationFactory
 {
     /**
@@ -25,7 +30,7 @@ class RelationFactory
      * Get the relations of an Entity.
      * Relations processors are passed to the constructor.
      *
-     * @param $resource
+     * @param object $resource
      *
      * @return array
      */

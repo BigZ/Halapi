@@ -8,6 +8,11 @@ use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 
+/**
+ * Class JsonEventSubscriber.
+ *
+ * @author Romain Richard
+ */
 class JsonEventSubscriber implements EventSubscriberInterface
 {
     /**

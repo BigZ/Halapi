@@ -10,6 +10,11 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\RouterInterface;
 
+/**
+ * Class PaginationFactory.
+ *
+ * @author Romain Richard
+ */
 class PaginationFactory
 {
     /**
@@ -27,6 +32,13 @@ class PaginationFactory
      */
     private $requestStack;
 
+    /**
+     * PaginationFactory constructor.
+     *
+     * @param RouterInterface        $router
+     * @param EntityManagerInterface $entityManager
+     * @param RequestStack           $requestStack
+     */
     public function __construct(
         RouterInterface $router,
         EntityManagerInterface $entityManager,
@@ -40,7 +52,7 @@ class PaginationFactory
     /**
      * Get a paginated representation of a collection of entities.
      *
-     * @param $className
+     * @param string $className
      *
      * @return PaginatedRepresentation
      */
@@ -64,7 +76,8 @@ class PaginationFactory
                 'first' => $this->getPaginatedRoute($shortName, $limit, 1, $sorting),
                 'next' => $this->getPaginatedRoute(
                     $shortName,
-                    $limit, $page < $pager->getNbPages() ? $page + 1 : $pager->getNbPages(),
+                    $limit,
+                    $page < $pager->getNbPages() ? $page + 1 : $pager->getNbPages(),
                     $sorting
                 ),
                 'last' => $this->getPaginatedRoute($shortName, $limit, $pager->getNbPages(), $sorting),
@@ -120,7 +133,8 @@ class PaginationFactory
     private function getPaginatedRoute($name, $limit, $page, $sorting)
     {
         return $this->router->generate(
-            'get_'.strtolower($name).'s', [
+            'get_'.strtolower($name).'s',
+            [
                 'sorting' => $sorting,
                 'page' => $page,
                 'limit' => $limit,

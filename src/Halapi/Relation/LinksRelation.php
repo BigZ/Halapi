@@ -4,6 +4,10 @@ namespace Halapi\Relation;
 
 use Doctrine\Common\Collections\Collection;
 
+/**
+ * Class LinksRelation
+ * @author Romain Richard
+ */
 class LinksRelation extends AbstractRelation implements RelationInterface
 {
     /**
@@ -35,6 +39,35 @@ class LinksRelation extends AbstractRelation implements RelationInterface
         }
 
         return $links;
+    }
+
+    /**
+     * @param string $property
+     * @param object $relationContent
+     * @return string|null
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    protected function getRelationLink($property, $relationContent)
+    {
+        $meta = $this->entityManager->getClassMetadata(get_class($relationContent));
+        $identifier = $meta->getSingleIdentifierFieldName();
+
+        foreach ($this->annotationReader->getPropertyAnnotations($property) as $annotation) {
+            if (isset($annotation->targetEntity)) {
+                try {
+                    $id = $this->entityManager->getUnitOfWork()->getEntityIdentifier($relationContent)[$identifier];
+
+                    return $this->router->generate(
+                        'get_'.strtolower($annotation->targetEntity),
+                        [strtolower($annotation->targetEntity) => $id]
+                    );
+                } catch (\Exception $exception) {
+                    return null;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -84,34 +117,5 @@ class LinksRelation extends AbstractRelation implements RelationInterface
         }
 
         return $this->getRelationLink($property, $relationContent);
-    }
-
-    /**
-     * @param $property
-     * @param $relationContent
-     *
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    protected function getRelationLink($property, $relationContent)
-    {
-        $meta = $this->entityManager->getClassMetadata(get_class($relationContent));
-        $identifier = $meta->getSingleIdentifierFieldName();
-
-        foreach ($this->annotationReader->getPropertyAnnotations($property) as $annotation) {
-            if (isset($annotation->targetEntity)) {
-                try {
-                    $id = $this->entityManager->getUnitOfWork()->getEntityIdentifier($relationContent)[$identifier];
-
-                    return $this->router->generate(
-                        'get_'.strtolower($annotation->targetEntity),
-                        [strtolower($annotation->targetEntity) => $id]
-                    );
-                } catch (\Exception $exception) {
-                    return;
-                }
-            }
-        }
-
-        return;
     }
 }

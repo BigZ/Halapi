@@ -2,6 +2,10 @@
 
 namespace Halapi\Relation;
 
+/**
+ * Interface RelationInterface
+ * @package Halapi\Relation
+ */
 interface RelationInterface
 {
     /**
@@ -15,7 +19,7 @@ interface RelationInterface
     /**
      * Get the content of the relation.
      *
-     * @param $resource
+     * @param object $resource
      *
      * @return null|string|array
      */
