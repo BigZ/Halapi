@@ -20,7 +20,7 @@ install:
     - composer install --no-interaction --prefer-dist
 
 script:
-    - ./bin/phpunit --coverage-text
+    - ./bin/phpunit --coverage-clover build/logs/clover.xml
 
 addons:
   code_climate:
