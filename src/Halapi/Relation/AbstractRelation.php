@@ -9,7 +9,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
- * Class AbstractRelation
+ * Class AbstractRelation.
+ *
  * @author Romain Richard
  */
 class AbstractRelation
@@ -37,10 +38,10 @@ class AbstractRelation
     /**
      * AbstractRelation constructor.
      *
-     * @param UrlGeneratorInterface  $urlGenerator
-     * @param Reader                 $annotationReader
-     * @param ObjectManager          $entityManager
-     * @param RequestStack           $requestStack
+     * @param UrlGeneratorInterface $urlGenerator
+     * @param Reader                $annotationReader
+     * @param ObjectManager         $entityManager
+     * @param RequestStack          $requestStack
      */
     public function __construct(
         UrlGeneratorInterface $urlGenerator,

@@ -6,7 +6,8 @@ use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Collections\Collection;
 
 /**
- * Class LinksRelation
+ * Class LinksRelation.
+ *
  * @author Romain Richard
  */
 class LinksRelation extends AbstractRelation implements RelationInterface
@@ -44,26 +45,29 @@ class LinksRelation extends AbstractRelation implements RelationInterface
 
     /**
      * @param \ReflectionProperty $property
-     * @param object $relationContent
+     * @param object              $relationContent
+     *
      * @return string|null
+     *
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
     protected function getRelationLink($property, $relationContent)
     {
         /**
-         * @var $annotation Annotation
+         * @var Annotation
          */
         foreach ($this->annotationReader->getPropertyAnnotations($property) as $annotation) {
             if (isset($annotation->targetEntity)) {
                 $shortName = strtolower((new \ReflectionClass($annotation->targetEntity))->getShortName());
+
                 return $this->urlGenerator->generate(
                     'get_'.$shortName,
                     [$shortName => $this->getEntityId($relationContent)]
                 );
             }
         }
-        
-        return null;
+
+        return;
     }
 
     /**
@@ -77,7 +81,7 @@ class LinksRelation extends AbstractRelation implements RelationInterface
     private function getSelfLink($resource, $reflectionClass)
     {
         if ($resource instanceof \Traversable) {
-            return null;
+            return;
         }
 
         return [
@@ -114,6 +118,7 @@ class LinksRelation extends AbstractRelation implements RelationInterface
      * Returns entity single identifier.
      * This is a compatibility-limiting feature as it will not be able to get the identity
      * of an entity which has multiple identifiers.
+     *
      * @param $entity
      */
     private function getEntityId($entity)

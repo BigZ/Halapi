@@ -2,6 +2,7 @@
 
 namespace Halapi\Representation;
 
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\QueryBuilder;
 
 /**
@@ -10,8 +11,16 @@ use Doctrine\ORM\QueryBuilder;
  */
 trait RestEntityRepositoryTrait
 {
+    /**
+     * @return ClassMetadata
+     */
     abstract public function getClassMetadata();
 
+    /**
+     * @param $alias
+     * @param null $indexBy
+     * @return QueryBuilder
+     */
     abstract public function createQueryBuilder($alias, $indexBy = null);
 
     /**

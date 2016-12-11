@@ -3,13 +3,16 @@
 namespace Halapi\Relation;
 
 use Doctrine\Common\Annotations\Reader;
+use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializerBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
- * Class EmbeddedRelation
+ * Class EmbeddedRelation.
+ *
  * @author Romain Richard
  */
 class EmbeddedRelation extends AbstractRelation implements RelationInterface
@@ -22,18 +25,18 @@ class EmbeddedRelation extends AbstractRelation implements RelationInterface
     /**
      * EmbeddedRelation constructor.
      *
-     * @param RouterInterface        $router
-     * @param Reader                 $annotationReader
-     * @param EntityManagerInterface $entityManager
-     * @param RequestStack           $requestStack
+     * @param UrlGeneratorInterface $urlGenerator
+     * @param Reader                $annotationReader
+     * @param ObjectManager         $entityManager
+     * @param RequestStack          $requestStack
      */
     public function __construct(
-        RouterInterface $router,
+        UrlGeneratorInterface $urlGenerator,
         Reader $annotationReader,
-        EntityManagerInterface $entityManager,
+        ObjectManager $entityManager,
         RequestStack $requestStack
     ) {
-        parent::__construct($router, $annotationReader, $entityManager, $requestStack);
+        parent::__construct($urlGenerator, $annotationReader, $entityManager, $requestStack);
         $this->serializer = SerializerBuilder::create()->build();
     }
 
@@ -98,7 +101,7 @@ class EmbeddedRelation extends AbstractRelation implements RelationInterface
     {
         $request = $this->requestStack->getMasterRequest();
 
-        $embed = $request->query->get('embed');
+        $embed = $request->get('embed');
 
         if (!is_array($embed)) {
             return [];
