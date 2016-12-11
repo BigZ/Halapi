@@ -1,6 +1,6 @@
 <?php
 
-namespace Halapi\Tests\Relation;
+namespace Halapi\Tests;
 
 use Halapi\Factory\RelationFactory;
 use Halapi\HalapiBuilder;
