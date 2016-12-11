@@ -16,7 +16,6 @@ use Halapi\Tests\Fixtures\Entity\Door;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * Class EmbeddedRelationTest.
@@ -25,11 +24,6 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  */
 class EmbeddedRelationTest extends TestCase
 {
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
-     */
-    private $urlGenerator;
-
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
@@ -50,7 +44,6 @@ class EmbeddedRelationTest extends TestCase
      */
     public function setUp()
     {
-        $this->urlGenerator = $this->createMock(UrlGeneratorInterface::class);
         $this->annotationReader = $this->createMock(Reader::class);
         $this->objectManager = $this->createMock(ObjectManager::class);
         $this->requestStack = $this->createMock(RequestStack::class);
@@ -62,7 +55,6 @@ class EmbeddedRelationTest extends TestCase
     public function testInterface()
     {
         $embeddedRelation = new EmbeddedRelation(
-            $this->urlGenerator,
             $this->annotationReader,
             $this->objectManager,
             $this->requestStack
@@ -77,7 +69,6 @@ class EmbeddedRelationTest extends TestCase
     public function testGetName()
     {
         $embeddedRelation = new EmbeddedRelation(
-            $this->urlGenerator,
             $this->annotationReader,
             $this->objectManager,
             $this->requestStack
@@ -132,7 +123,6 @@ class EmbeddedRelationTest extends TestCase
         ;
 
         $embeddedRelation = new EmbeddedRelation(
-            $this->urlGenerator,
             $this->annotationReader,
             $this->objectManager,
             $this->requestStack

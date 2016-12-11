@@ -6,7 +6,6 @@ use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Persistence\ObjectManager;
 use JMS\Serializer\SerializerBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * Class EmbeddedRelation.
@@ -16,6 +15,16 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class EmbeddedRelation extends AbstractRelation implements RelationInterface
 {
     /**
+     * @var ObjectManager
+     */
+    private $objectManager;
+
+    /**
+     * @var RequestStack
+     */
+    private $requestStack;
+
+    /**
      * @var \JMS\Serializer\Serializer
      */
     private $serializer;
@@ -23,18 +32,18 @@ class EmbeddedRelation extends AbstractRelation implements RelationInterface
     /**
      * EmbeddedRelation constructor.
      *
-     * @param UrlGeneratorInterface $urlGenerator
-     * @param Reader                $annotationReader
-     * @param ObjectManager         $entityManager
-     * @param RequestStack          $requestStack
+     * @param Reader        $annotationReader
+     * @param ObjectManager $objectManager
+     * @param RequestStack  $requestStack
      */
     public function __construct(
-        UrlGeneratorInterface $urlGenerator,
         Reader $annotationReader,
-        ObjectManager $entityManager,
+        ObjectManager $objectManager,
         RequestStack $requestStack
     ) {
-        parent::__construct($urlGenerator, $annotationReader, $entityManager, $requestStack);
+        $this->annotationReader = $annotationReader;
+        $this->objectManager = $objectManager;
+        $this->requestStack = $requestStack;
         $this->serializer = SerializerBuilder::create()->build();
     }
 

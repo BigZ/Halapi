@@ -2,12 +2,9 @@
 
 namespace Halapi\Tests\Relation;
 
-use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\ObjectManager;
-use Doctrine\ORM\Mapping\ManyToOne;
-use Doctrine\ORM\Mapping\OneToMany;
 use Halapi\Annotation\Embeddable;
 use Halapi\Relation\LinksRelation;
 use Halapi\Relation\RelationInterface;
@@ -63,8 +60,8 @@ class LinksRelationTest extends TestCase
     public function testInterface()
     {
         $linkRelation = new LinksRelation(
-            $this->urlGenerator,
             $this->annotationReader,
+            $this->urlGenerator,
             $this->objectManager,
             $this->requestStack
         );
@@ -78,8 +75,8 @@ class LinksRelationTest extends TestCase
     public function testGetName()
     {
         $linkRelation = new LinksRelation(
-            $this->urlGenerator,
             $this->annotationReader,
+            $this->urlGenerator,
             $this->objectManager,
             $this->requestStack
         );
@@ -94,6 +91,16 @@ class LinksRelationTest extends TestCase
     {
         $classMetadataMock = $this->createMock(ClassMetadata::class);
         $classMetadataMock->method('getIdentifier')->willReturn(['id']);
+        $classMetadataMock->method('hasAssociation')->willReturn(true);
+        $classMetadataMock->method('getAssociationTargetClass')->willReturnCallback(function ($property) {
+            switch ($property) {
+                case 'doors':
+                    return Door::class;
+                case 'engine':
+                    return Engine::class;
+            }
+        });
+
         $this->objectManager
             ->method('getClassMetadata')
             ->willReturn($classMetadataMock);
@@ -125,29 +132,9 @@ class LinksRelationTest extends TestCase
             })
         ;
 
-        $this->annotationReader
-            ->method('getPropertyAnnotations')
-            ->willReturnCallback(function ($property) use ($reflectionClass) {
-                switch ($property) {
-                    case $reflectionClass->getProperty('doors'):
-                        $doorsRelationAnnotation = new OneToMany();
-                        $doorsRelationAnnotation->targetEntity = Door::class;
-
-                        return [new Annotation([]), $doorsRelationAnnotation];
-                    case $reflectionClass->getProperty('engine'):
-                        $engineRelationAnnotation = new ManyToOne();
-                        $engineRelationAnnotation->targetEntity = Engine::class;
-
-                        return [new Annotation([]), $engineRelationAnnotation];
-                    default:
-                        return [];
-                }
-            })
-        ;
-
         $linkRelation = new LinksRelation(
-            $this->urlGenerator,
             $this->annotationReader,
+            $this->urlGenerator,
             $this->objectManager,
             $this->requestStack
         );
@@ -204,8 +191,8 @@ class LinksRelationTest extends TestCase
     public function testArrayHasNoLinks()
     {
         $linkRelation = new LinksRelation(
-            $this->urlGenerator,
             $this->annotationReader,
+            $this->urlGenerator,
             $this->objectManager,
             $this->requestStack
         );

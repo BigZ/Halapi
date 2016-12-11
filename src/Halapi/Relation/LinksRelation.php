@@ -2,8 +2,12 @@
 
 namespace Halapi\Relation;
 
-use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Common\Annotations\Reader;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * Class LinksRelation.
@@ -12,6 +16,51 @@ use Doctrine\Common\Collections\Collection;
  */
 class LinksRelation extends AbstractRelation implements RelationInterface
 {
+    /**
+     * @var UrlGeneratorInterface
+     */
+    private $urlGenerator;
+
+    /**
+     * @var ObjectManager
+     */
+    private $objectManager;
+
+    /**
+     * @var RequestStack
+     */
+    private $requestStack;
+
+    /**
+     * @var ClassMetadata
+     */
+    private $classMetadata;
+
+    /**
+     * @var \ReflectionClass
+     */
+    private $reflectionClass;
+
+    /**
+     * AbstractRelation constructor.
+     *
+     * @param Reader                $annotationReader
+     * @param UrlGeneratorInterface $urlGenerator
+     * @param ObjectManager         $objectManager
+     * @param RequestStack          $requestStack
+     */
+    public function __construct(
+        Reader $annotationReader,
+        UrlGeneratorInterface $urlGenerator,
+        ObjectManager $objectManager,
+        RequestStack $requestStack
+    ) {
+        $this->urlGenerator = $urlGenerator;
+        $this->annotationReader = $annotationReader;
+        $this->objectManager = $objectManager;
+        $this->requestStack = $requestStack;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -25,10 +74,11 @@ class LinksRelation extends AbstractRelation implements RelationInterface
      */
     public function getRelation($resource)
     {
-        $reflectionClass = new \ReflectionClass($resource);
-        $links = $this->getSelfLink($resource, $reflectionClass);
+        $this->classMetadata = $this->objectManager->getClassMetadata(get_class($resource));
+        $this->reflectionClass = new \ReflectionClass($resource);
+        $links = $this->getSelfLink($resource);
 
-        foreach ($reflectionClass->getProperties() as $property) {
+        foreach ($this->reflectionClass->getProperties() as $property) {
             if ($this->isEmbeddable($property) && $property->getName()) {
                 $propertyName = $property->getName();
                 $relationContent = $resource->{'get'.ucfirst($propertyName)}();
@@ -49,20 +99,16 @@ class LinksRelation extends AbstractRelation implements RelationInterface
      *
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    protected function getRelationLink($property, $relationContent)
+    private function getRelationLink(\ReflectionProperty $property, $relationContent)
     {
-        /*
-         * @var Annotation
-         */
-        foreach ($this->annotationReader->getPropertyAnnotations($property) as $annotation) {
-            if (isset($annotation->targetEntity)) {
-                $shortName = strtolower((new \ReflectionClass($annotation->targetEntity))->getShortName());
+        if ($this->classMetadata->hasAssociation($property->getName())) {
+            $targetClass = $this->classMetadata->getAssociationTargetClass($property->getName());
+            $shortName = strtolower((new \ReflectionClass($targetClass))->getShortName());
 
-                return $this->urlGenerator->generate(
-                    'get_'.$shortName,
-                    [$shortName => $this->getEntityId($relationContent)]
-                );
-            }
+            return $this->urlGenerator->generate(
+                'get_'.$shortName,
+                [$shortName => $this->getEntityId($relationContent)]
+            );
         }
     }
 
@@ -74,7 +120,7 @@ class LinksRelation extends AbstractRelation implements RelationInterface
      *
      * @return array|null
      */
-    private function getSelfLink($resource, $reflectionClass)
+    private function getSelfLink($resource)
     {
         if ($resource instanceof \Traversable) {
             return;
@@ -82,8 +128,8 @@ class LinksRelation extends AbstractRelation implements RelationInterface
 
         return [
             'self' => $this->urlGenerator->generate(
-                'get_'.strtolower($reflectionClass->getShortName()),
-                [strtolower($reflectionClass->getShortName()) => $this->getEntityId($resource)]
+                'get_'.strtolower($this->reflectionClass->getShortName()),
+                [strtolower($this->reflectionClass->getShortName()) => $this->getEntityId($resource)]
             ),
         ];
     }
@@ -96,7 +142,7 @@ class LinksRelation extends AbstractRelation implements RelationInterface
      *
      * @return array|void
      */
-    private function getRelationLinks($property, $relationContent)
+    private function getRelationLinks(\ReflectionProperty $property, $relationContent)
     {
         if ($relationContent instanceof Collection) {
             $links = [];
@@ -119,8 +165,7 @@ class LinksRelation extends AbstractRelation implements RelationInterface
      */
     private function getEntityId($entity)
     {
-        $meta = $this->entityManager->getClassMetadata(get_class($entity));
-        $identifier = $meta->getIdentifier()[0];
+        $identifier = $this->classMetadata->getIdentifier()[0];
         $getter = 'get'.ucfirst($identifier);
 
         return $entity->$getter();

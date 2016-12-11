@@ -34,7 +34,7 @@ class HalapiBuilderTest extends TestCase
             ->method('configureListeners')
             ->willReturnCallback(function ($callback) use ($eventDispatcherMock) {
                 $callback($eventDispatcherMock);
-        });
+            });
 
         $serializerBuilderMock->expects($this->once())->method('addDefaultListeners')->willReturn($serializerBuilderMock);
 
