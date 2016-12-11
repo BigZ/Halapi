@@ -21,3 +21,10 @@ install:
 
 script:
     - ./bin/phpunit --coverage-text
+
+addons:
+  code_climate:
+    repo_token: 69523150e5928797e06a99d9d5ae48ac4090ac40ff00fb13eafc4d3744e84ac6
+
+after_success:
+  - bin/test-reporter
