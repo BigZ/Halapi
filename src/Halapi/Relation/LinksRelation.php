@@ -32,10 +32,8 @@ class LinksRelation extends AbstractRelation implements RelationInterface
             if ($this->isEmbeddable($property) && $property->getName()) {
                 $propertyName = $property->getName();
                 $relationContent = $resource->{'get'.ucfirst($propertyName)}();
-                $links[$propertyName] = $this->getRelationLinks($property, $relationContent);
-
-                if (!$links[$propertyName]) {
-                    unset($links[$propertyName]);
+                if ($relationContent) {
+                    $links[$propertyName] = $this->getRelationLinks($property, $relationContent);
                 }
             }
         }
@@ -53,7 +51,7 @@ class LinksRelation extends AbstractRelation implements RelationInterface
      */
     protected function getRelationLink($property, $relationContent)
     {
-        /**
+        /*
          * @var Annotation
          */
         foreach ($this->annotationReader->getPropertyAnnotations($property) as $annotation) {

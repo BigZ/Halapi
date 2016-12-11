@@ -3,9 +3,11 @@ Hypertext Application Language for (REpresentational State Transfer) Application
 
 [![Build
 Status](https://travis-ci.org/BigZ/Halapi.svg?branch=master)](http://travis-ci.org/BigZ/Halapi)
+[![Test Coverage](https://codeclimate.com/github/BigZ/Halapi/badges/coverage.svg)](https://codeclimate.com/github/BigZ/Halapi/coverage)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/240ef51f-6625-4c79-9ba2-58d4fcb63fa5/mini.png)](https://insight.sensiolabs.com/projects/240ef51f-6625-4c79-9ba2-58d4fcb63fa5)
 [![Scrutinizer Quality
 Score](https://scrutinizer-ci.com/g/BigZ/Halapi/badges/quality-score.png?s=45b5a825f99de4d29c98b5103f59e060139cf354)](https://scrutinizer-ci.com/g/BigZ/Halapi/)
+[![Code Climate](https://codeclimate.com/github/BigZ/Halapi/badges/gpa.svg)](https://codeclimate.com/github/BigZ/Halapi)
 
 Given some conventions, displaying the HAL representation of any entity becomes very easy.
 

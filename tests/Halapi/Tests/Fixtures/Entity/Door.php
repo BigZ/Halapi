@@ -3,7 +3,8 @@
 namespace Halapi\Tests\Fixtures\Entity;
 
 /**
- * Door fixture
+ * Door fixture.
+ *
  * @author Romain Richard
  */
 class Door

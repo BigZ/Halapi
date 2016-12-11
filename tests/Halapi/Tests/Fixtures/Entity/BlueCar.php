@@ -1,11 +1,13 @@
 <?php
 
 namespace Halapi\Tests\Fixtures\Entity;
+
 use Doctrine\Common\Collections\ArrayCollection;
 use Halapi\Annotation\Embeddable;
 
 /**
- * Class BlueCar
+ * Class BlueCar.
+ *
  * @author Romain Richard
  */
 class BlueCar
@@ -14,13 +16,22 @@ class BlueCar
      * @var int
      */
     private $id;
-    
+
     /**
      * @var ArrayCollection
      * @Embeddable()
      */
-    private $doors;    
-    
+    private $doors;
+
+    /**
+     * @var Engine
+     * @Embeddable()
+     */
+    private $engine;
+
+    /**
+     * @return int
+     */
     public function getId()
     {
         return $this->id;
@@ -33,7 +44,7 @@ class BlueCar
     {
         $this->id = $id;
     }
-    
+
     /**
      * @return ArrayCollection
      */
@@ -49,5 +60,20 @@ class BlueCar
     {
         $this->doors = $doors;
     }
-    
+
+    /**
+     * @return Engine
+     */
+    public function getEngine()
+    {
+        return $this->engine;
+    }
+
+    /**
+     * @param Engine $engine
+     */
+    public function setEngine(Engine $engine)
+    {
+        $this->engine = $engine;
+    }
 }

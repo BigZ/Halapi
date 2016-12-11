@@ -6,6 +6,7 @@ use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Halapi\Annotation\Embeddable;
 use Halapi\Relation\LinksRelation;
@@ -13,12 +14,14 @@ use Halapi\Relation\RelationInterface;
 use Doctrine\Common\Annotations\Reader;
 use Halapi\Tests\Fixtures\Entity\BlueCar;
 use Halapi\Tests\Fixtures\Entity\Door;
+use Halapi\Tests\Fixtures\Entity\Engine;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
- * Class LinksRelationTest
+ * Class LinksRelationTest.
+ *
  * @author Romain Richard
  */
 class LinksRelationTest extends TestCase
@@ -43,6 +46,9 @@ class LinksRelationTest extends TestCase
      */
     private $requestStack;
 
+    /**
+     * Set up mocks
+     */
     public function setUp()
     {
         $this->urlGenerator = $this->createMock(UrlGeneratorInterface::class);
@@ -52,7 +58,7 @@ class LinksRelationTest extends TestCase
     }
 
     /**
-     * tests that the relation has the proper interface
+     * tests that the relation has the proper interface.
      */
     public function testInterface()
     {
@@ -66,6 +72,9 @@ class LinksRelationTest extends TestCase
         $this->assertInstanceOf(RelationInterface::class, $linkRelation);
     }
 
+    /**
+     * This relation should have the name _links
+     */
     public function testGetName()
     {
         $linkRelation = new LinksRelation(
@@ -79,7 +88,7 @@ class LinksRelationTest extends TestCase
     }
 
     /**
-     * Blue car has 2 doors
+     * Blue car has 2 doors.
      */
     public function testGetRelation()
     {
@@ -89,55 +98,51 @@ class LinksRelationTest extends TestCase
             ->method('getClassMetadata')
             ->willReturn($classMetadataMock);
 
-        // url to self
         $this->urlGenerator
-            ->expects($this->at(0))
             ->method('generate')
-            ->with('get_bluecar', ['bluecar' => 1])
-            ->willReturn('/bluecars/1')
-        ;
+            ->willReturnCallback(function ($routeName, $parameters) {
+                $route = explode('_', $routeName);
 
-        // urls to door relations
-        $this->urlGenerator
-            ->expects($this->at(1))
-            ->method('generate')
-            ->with('get_door', ['door' => 1])
-            ->willReturn('/doors/1')
-        ;
-        $this->urlGenerator
-            ->expects($this->at(2))
-            ->method('generate')
-            ->with('get_door', ['door' => 2])
-            ->willReturn('/doors/2')
+                return '/'.$route[1].'s/'.$parameters[$route[1]];
+            })
         ;
 
         // Are the properties of a bluecar embedable ?
         $reflectionClass = new \ReflectionClass(new BlueCar());
         $this->annotationReader
-            ->expects($this->at(0))
             ->method('getPropertyAnnotation')
-            ->with(
-                $reflectionClass->getProperty('id'),
-                Embeddable::class
-            )
-            ->willReturn(null)
-        ;
-        $this->annotationReader
-            ->expects($this->at(1))
-            ->method('getPropertyAnnotation')
-            ->with(
-                $reflectionClass->getProperty('doors'),
-                Embeddable::class
-            )
-            ->willReturn(1)
+            ->willReturnCallback(function ($property, $class) use ($reflectionClass) {
+                if (Embeddable::class === $class) {
+                    switch ($property) {
+                        case $reflectionClass->getProperty('doors'):
+                            return true;
+                        case $reflectionClass->getProperty('engine'):
+                            return true;
+                    }
+                }
+
+                return null;
+            })
         ;
 
-        $doorsRelationAnnotation = new OneToMany();
-        $doorsRelationAnnotation->targetEntity = Door::class;
         $this->annotationReader
             ->method('getPropertyAnnotations')
-            ->with($reflectionClass->getProperty('doors'))
-            ->willReturn([new Annotation([]), $doorsRelationAnnotation])
+            ->willReturnCallback(function ($property) use ($reflectionClass) {
+                switch ($property) {
+                    case $reflectionClass->getProperty('doors'):
+                        $doorsRelationAnnotation = new OneToMany();
+                        $doorsRelationAnnotation->targetEntity = Door::class;
+
+                        return [new Annotation([]), $doorsRelationAnnotation];
+                    case $reflectionClass->getProperty('engine'):
+                        $engineRelationAnnotation = new ManyToOne();
+                        $engineRelationAnnotation->targetEntity = Engine::class;
+
+                        return [new Annotation([]), $engineRelationAnnotation];
+                    default:
+                        return [];
+                }
+            })
         ;
 
         $linkRelation = new LinksRelation(
@@ -155,19 +160,56 @@ class LinksRelationTest extends TestCase
         $rightDoor->setId(2);
         $rightDoor->setSide('right');
 
+        $engine = new Engine();
+        $engine->setId(23);
+        $engine->setHorses(12);
+        $engine->setName('V8');
+
         $blueCar = new BlueCar();
         $blueCar->setId(1);
         $blueCar->setDoors(new ArrayCollection([$leftDoor, $rightDoor]));
+        $blueCar->setEngine($engine);
 
         $this->assertEquals(
             [
                 'self' => '/bluecars/1',
                 'doors' => [
                     '/doors/1',
-                    '/doors/2'
+                    '/doors/2',
                 ],
+                'engine' => '/engines/23',
             ],
             $linkRelation->getRelation($blueCar)
         );
+
+        $blueCarWithoutEngine = new BlueCar();
+        $blueCarWithoutEngine->setId(2);
+        $blueCarWithoutEngine->setDoors(new ArrayCollection([$leftDoor, $rightDoor]));
+
+        $this->assertEquals(
+            [
+                'self' => '/bluecars/2',
+                'doors' => [
+                    '/doors/1',
+                    '/doors/2',
+                ],
+            ],
+            $linkRelation->getRelation($blueCarWithoutEngine)
+        );
+    }
+
+    /**
+     * A collection should not have any links
+     */
+    public function testArrayHasNoLinks()
+    {
+        $linkRelation = new LinksRelation(
+            $this->urlGenerator,
+            $this->annotationReader,
+            $this->objectManager,
+            $this->requestStack
+        );
+
+        $this->assertNull($linkRelation->getRelation(new ArrayCollection(['test'])));
     }
 }

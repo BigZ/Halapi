@@ -1,18 +1,21 @@
 <?php
 
+namespace Halapi\Tests\Factory;
+
 use PHPUnit\Framework\TestCase;
 use Halapi\Factory\RelationFactory;
 use Halapi\Relation\RelationInterface;
 use Halapi\Tests\Fixtures\Entity\BlueCar;
 
 /**
- * Class RelationFactoryTest
+ * Class RelationFactoryTest.
+ *
  * @author Romain Richard
  */
 class RelationFactoryTest extends TestCase
 {
     /**
-     * Test relation factory
+     * Test relation factory.
      */
     public function testGetRelations()
     {
@@ -23,7 +26,7 @@ class RelationFactoryTest extends TestCase
         $embeddedRelationMock->method('getName')->willReturn('_embedded');
         $embeddedRelationMock->method('getRelation')->willReturn(['friend' => ['id' => 1, 'name' => 'bob']]);
         $relationFactory = new RelationFactory([$linksRelationMock, $embeddedRelationMock]);
-        
+
         $this->assertEquals(
             $relationFactory->getRelations(new BlueCar()),
             [

@@ -19,7 +19,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
- * Class EmbeddedRelationTest
+ * Class EmbeddedRelationTest.
+ *
  * @author Romain Richard
  */
 class EmbeddedRelationTest extends TestCase
@@ -44,6 +45,9 @@ class EmbeddedRelationTest extends TestCase
      */
     private $requestStack;
 
+    /**
+     * Set up mocks
+     */
     public function setUp()
     {
         $this->urlGenerator = $this->createMock(UrlGeneratorInterface::class);
@@ -53,7 +57,7 @@ class EmbeddedRelationTest extends TestCase
     }
 
     /**
-     * tests that the relation has the proper interface
+     * tests that the relation has the proper interface.
      */
     public function testInterface()
     {
@@ -67,6 +71,9 @@ class EmbeddedRelationTest extends TestCase
         $this->assertInstanceOf(RelationInterface::class, $embeddedRelation);
     }
 
+    /**
+     * Name should be _embedded
+     */
     public function testGetName()
     {
         $embeddedRelation = new EmbeddedRelation(
@@ -80,7 +87,7 @@ class EmbeddedRelationTest extends TestCase
     }
 
     /**
-     * Blue car has 2 doors
+     * Blue car has 2 doors.
      */
     public function testGetRelation()
     {
@@ -93,7 +100,7 @@ class EmbeddedRelationTest extends TestCase
         $masterRequestMock = $this->createMock(Request::class);
         $masterRequestMock->method('get')->with('embed')->willReturn(['doors']);
         $this->requestStack->method('getMasterRequest')->willReturn($masterRequestMock);
-        
+
         // Are the properties of a bluecar embedable ?
         $reflectionClass = new \ReflectionClass(new BlueCar());
         $this->annotationReader
@@ -146,7 +153,7 @@ class EmbeddedRelationTest extends TestCase
             [
                 'doors' => [
                     ['id' => 1, 'side' => 'left'],
-                    ['id' => 2, 'side' => 'right']
+                    ['id' => 2, 'side' => 'right'],
                 ],
             ],
             $embeddedRelation->getRelation($blueCar)
