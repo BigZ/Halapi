@@ -98,7 +98,8 @@ class EmbeddedRelationTest extends TestCase
             ->willReturn($classMetadataMock);
 
         $masterRequestMock = $this->createMock(Request::class);
-        $masterRequestMock->method('get')->with('embed')->willReturn(['doors']);
+        $masterRequestMock->expects($this->at(0))->method('get')->with('embed')->willReturn(['doors']);
+        $masterRequestMock->expects($this->at(0))->method('get')->with('embed')->willReturn('wrong');
         $this->requestStack->method('getMasterRequest')->willReturn($masterRequestMock);
 
         // Are the properties of a bluecar embedable ?
@@ -158,5 +159,6 @@ class EmbeddedRelationTest extends TestCase
             ],
             $embeddedRelation->getRelation($blueCar)
         );
+        $this->assertEquals([], $embeddedRelation->getRelation($blueCar));
     }
 }

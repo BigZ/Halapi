@@ -8,11 +8,11 @@ use JMS\Serializer\EventDispatcher\EventDispatcherInterface;
 use JMS\Serializer\SerializerBuilder;
 
 /**
- * Class HALAPIBuilder.
+ * Class HalapiBuilder.
  *
  * @author Romain Richard
  */
-class HALAPIBuilder
+class HalapiBuilder
 {
     /**
      * @var RelationFactory
@@ -46,7 +46,7 @@ class HALAPIBuilder
         $this->serializerBuilder
             ->addDefaultListeners()
             ->configureListeners(function (EventDispatcherInterface $dispatcher) {
-                    $dispatcher->addSubscriber(new JsonEventSubscriber($this->relationFactory));
+                $dispatcher->addSubscriber(new JsonEventSubscriber($this->relationFactory));
             })
         ;
 

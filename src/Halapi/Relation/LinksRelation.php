@@ -64,8 +64,6 @@ class LinksRelation extends AbstractRelation implements RelationInterface
                 );
             }
         }
-
-        return;
     }
 
     /**
