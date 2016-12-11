@@ -2,11 +2,11 @@
 
 namespace Halapi\Relation;
 
+use Doctrine\Common\Persistence\ObjectManager;
 use Halapi\Annotation\Embeddable;
 use Doctrine\Common\Annotations\Reader;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * Class AbstractRelation
@@ -15,9 +15,9 @@ use Symfony\Component\Routing\RouterInterface;
 class AbstractRelation
 {
     /**
-     * @var RouterInterface
+     * @var UrlGeneratorInterface
      */
-    protected $router;
+    protected $urlGenerator;
 
     /**
      * @var Reader
@@ -25,7 +25,7 @@ class AbstractRelation
     protected $annotationReader;
 
     /**
-     * @var EntityManagerInterface
+     * @var ObjectManager
      */
     protected $entityManager;
 
@@ -37,18 +37,18 @@ class AbstractRelation
     /**
      * AbstractRelation constructor.
      *
-     * @param RouterInterface        $router
+     * @param UrlGeneratorInterface  $urlGenerator
      * @param Reader                 $annotationReader
-     * @param EntityManagerInterface $entityManager
+     * @param ObjectManager          $entityManager
      * @param RequestStack           $requestStack
      */
     public function __construct(
-        RouterInterface $router,
+        UrlGeneratorInterface $urlGenerator,
         Reader $annotationReader,
-        EntityManagerInterface $entityManager,
+        ObjectManager $entityManager,
         RequestStack $requestStack
     ) {
-        $this->router = $router;
+        $this->urlGenerator = $urlGenerator;
         $this->annotationReader = $annotationReader;
         $this->entityManager = $entityManager;
         $this->requestStack = $requestStack;

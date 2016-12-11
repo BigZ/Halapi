@@ -7,11 +7,13 @@ Status](https://travis-ci.org/BigZ/Halapi.svg?branch=master)](http://travis-ci.o
 [![Scrutinizer Quality
 Score](https://scrutinizer-ci.com/g/BigZ/Halapi/badges/quality-score.png?s=45b5a825f99de4d29c98b5103f59e060139cf354)](https://scrutinizer-ci.com/g/BigZ/Halapi/)
 
-This library is a tighly coupled to Doctrine ORM & Symfony's Router implementation of an HAL formatter.
-
 Given some conventions, displaying the HAL representation of any entity becomes vert easy.
 
-If you're using symfony; use Bigz/HalApiBundle to make use of the services definition
+HAL is a json presentation format of the HATEOAS constraint, which is meant to add relations between objects.
+
+It's whole specification is available here http://stateless.co/hal_specification.html
+
+This library uses jms_serializer to serialize objects in json.
 
 If not, here's how to use it
 

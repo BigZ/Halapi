@@ -2,46 +2,172 @@
 
 namespace Halapi\Tests\Relation;
 
-
+use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\Mapping\OneToMany;
+use Halapi\Annotation\Embeddable;
 use Halapi\Relation\LinksRelation;
 use Halapi\Relation\RelationInterface;
 use Doctrine\Common\Annotations\Reader;
-use Doctrine\ORM\EntityManagerInterface;
+use Halapi\Tests\Fixtures\Entity\BlueCar;
+use Halapi\Tests\Fixtures\Entity\Door;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
- * @covers LinksRelation
+ * Class LinksRelationTest
+ * @author Romain Richard
  */
 class LinksRelationTest extends TestCase
 {
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    private $urlGenerator;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    private $annotationReader;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    private $objectManager;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    private $requestStack;
+
+    public function setUp()
+    {
+        $this->urlGenerator = $this->createMock(UrlGeneratorInterface::class);
+        $this->annotationReader = $this->createMock(Reader::class);
+        $this->objectManager = $this->createMock(ObjectManager::class);
+        $this->requestStack = $this->createMock(RequestStack::class);
+    }
+
+    /**
+     * tests that the relation has the proper interface
+     */
     public function testInterface()
     {
-        $router = $this->createMock(RouterInterface::class);
-        $annotationReader = $this->createMock(Reader::class);
-        $entityManager = $this->createMock(EntityManagerInterface::class);
-        $requestStack = $this->createMock(RequestStack::class);
-        $object = new LinksRelation($router, $annotationReader, $entityManager, $requestStack);
+        $linkRelation = new LinksRelation(
+            $this->urlGenerator,
+            $this->annotationReader,
+            $this->objectManager,
+            $this->requestStack
+        );
 
-        $this->assertInstanceOf(RelationInterface::class, $object);
+        $this->assertInstanceOf(RelationInterface::class, $linkRelation);
     }
 
-    public function testGetSelfLink()
+    public function testGetName()
     {
-        $router = $this->createMock(RouterInterface::class);
-        $annotationReader = $this->createMock(Reader::class);
-        $entityManager = $this->createMock(EntityManagerInterface::class);
-        $requestStack = $this->createMock(RequestStack::class);
-        $object = new LinksRelation($router, $annotationReader, $entityManager, $requestStack);
+        $linkRelation = new LinksRelation(
+            $this->urlGenerator,
+            $this->annotationReader,
+            $this->objectManager,
+            $this->requestStack
+        );
 
-        $this->assertEquals([], $object);
+        $this->assertEquals('_links', $linkRelation->getName());
     }
-}
 
-class LinkRelationTestObject
-{
-    private $id;
+    /**
+     * Blue car has 2 doors
+     */
+    public function testGetRelation()
+    {
+        $classMetadataMock = $this->createMock(ClassMetadata::class);
+        $classMetadataMock->method('getIdentifier')->willReturn(['id']);
+        $this->objectManager
+            ->method('getClassMetadata')
+            ->willReturn($classMetadataMock);
 
-    private $relation;
+        // url to self
+        $this->urlGenerator
+            ->expects($this->at(0))
+            ->method('generate')
+            ->with('get_bluecar', ['bluecar' => 1])
+            ->willReturn('/bluecars/1')
+        ;
+
+        // urls to door relations
+        $this->urlGenerator
+            ->expects($this->at(1))
+            ->method('generate')
+            ->with('get_door', ['door' => 1])
+            ->willReturn('/doors/1')
+        ;
+        $this->urlGenerator
+            ->expects($this->at(2))
+            ->method('generate')
+            ->with('get_door', ['door' => 2])
+            ->willReturn('/doors/2')
+        ;
+
+        // Are the properties of a bluecar embedable ?
+        $reflectionClass = new \ReflectionClass(new BlueCar());
+        $this->annotationReader
+            ->expects($this->at(0))
+            ->method('getPropertyAnnotation')
+            ->with(
+                $reflectionClass->getProperty('id'),
+                Embeddable::class
+            )
+            ->willReturn(null)
+        ;
+        $this->annotationReader
+            ->expects($this->at(1))
+            ->method('getPropertyAnnotation')
+            ->with(
+                $reflectionClass->getProperty('doors'),
+                Embeddable::class
+            )
+            ->willReturn(1)
+        ;
+
+        $doorsRelationAnnotation = new OneToMany();
+        $doorsRelationAnnotation->targetEntity = Door::class;
+        $this->annotationReader
+            ->method('getPropertyAnnotations')
+            ->with($reflectionClass->getProperty('doors'))
+            ->willReturn([new Annotation([]), $doorsRelationAnnotation])
+        ;
+
+        $linkRelation = new LinksRelation(
+            $this->urlGenerator,
+            $this->annotationReader,
+            $this->objectManager,
+            $this->requestStack
+        );
+
+        $leftDoor = new Door();
+        $leftDoor->setId(1);
+        $leftDoor->setSide('left');
+
+        $rightDoor = new Door();
+        $rightDoor->setId(2);
+        $rightDoor->setSide('right');
+
+        $blueCar = new BlueCar();
+        $blueCar->setId(1);
+        $blueCar->setDoors(new ArrayCollection([$leftDoor, $rightDoor]));
+
+        $this->assertEquals(
+            [
+                'self' => '/bluecars/1',
+                'doors' => [
+                    '/doors/1',
+                    '/doors/2'
+                ],
+            ],
+            $linkRelation->getRelation($blueCar)
+        );
+    }
 }

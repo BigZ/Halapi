@@ -2,6 +2,7 @@
 
 namespace Halapi\Relation;
 
+use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Collections\Collection;
 
 /**
@@ -49,24 +50,19 @@ class LinksRelation extends AbstractRelation implements RelationInterface
      */
     protected function getRelationLink($property, $relationContent)
     {
-        $meta = $this->entityManager->getClassMetadata(get_class($relationContent));
-        $identifier = $meta->getSingleIdentifierFieldName();
-
+        /**
+         * @var $annotation Annotation
+         */
         foreach ($this->annotationReader->getPropertyAnnotations($property) as $annotation) {
             if (isset($annotation->targetEntity)) {
-                try {
-                    $id = $this->entityManager->getUnitOfWork()->getEntityIdentifier($relationContent)[$identifier];
-
-                    return $this->router->generate(
-                        'get_'.strtolower($annotation->targetEntity),
-                        [strtolower($annotation->targetEntity) => $id]
-                    );
-                } catch (\Exception $exception) {
-                    return null;
-                }
+                $shortName = strtolower((new \ReflectionClass($annotation->targetEntity))->getShortName());
+                return $this->urlGenerator->generate(
+                    'get_'.$shortName,
+                    [$shortName => $this->getEntityId($relationContent)]
+                );
             }
         }
-
+        
         return null;
     }
 
@@ -76,24 +72,20 @@ class LinksRelation extends AbstractRelation implements RelationInterface
      * @param $resource
      * @param \ReflectionClass $reflectionClass
      *
-     * @return array|void
+     * @return array|null
      */
     private function getSelfLink($resource, $reflectionClass)
     {
         if ($resource instanceof \Traversable) {
-            return;
+            return null;
         }
 
-        try {
-            return [
-                'self' => $this->router->generate(
-                    'get_'.strtolower($reflectionClass->getShortName()),
-                    [strtolower($reflectionClass->getShortName()) => $resource->getId()]
-                ),
-            ];
-        } catch (\Exception $exception) {
-            return [];
-        }
+        return [
+            'self' => $this->urlGenerator->generate(
+                'get_'.strtolower($reflectionClass->getShortName()),
+                [strtolower($reflectionClass->getShortName()) => $this->getEntityId($resource)]
+            ),
+        ];
     }
 
     /**
@@ -108,7 +100,6 @@ class LinksRelation extends AbstractRelation implements RelationInterface
     {
         if ($relationContent instanceof Collection) {
             $links = [];
-
             foreach ($relationContent as $relation) {
                 $links[] = $this->getRelationLink($property, $relation);
             }
@@ -117,5 +108,20 @@ class LinksRelation extends AbstractRelation implements RelationInterface
         }
 
         return $this->getRelationLink($property, $relationContent);
+    }
+
+    /**
+     * Returns entity single identifier.
+     * This is a compatibility-limiting feature as it will not be able to get the identity
+     * of an entity which has multiple identifiers.
+     * @param $entity
+     */
+    private function getEntityId($entity)
+    {
+        $meta = $this->entityManager->getClassMetadata(get_class($entity));
+        $identifier = $meta->getIdentifier()[0];
+        $getter = 'get'.ucfirst($identifier);
+
+        return $entity->$getter();
     }
 }

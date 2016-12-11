@@ -4,7 +4,12 @@ namespace Halapi\Relation;
 
 /**
  * Interface RelationInterface
+ * 
+ * A relation is an extra field added to an object upon serialization,
+ * which links it somehow to other objects in the repository.
+ * 
  * @package Halapi\Relation
+ * @author Romain Richard
  */
 interface RelationInterface
 {
