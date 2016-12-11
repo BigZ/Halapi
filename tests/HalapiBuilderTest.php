@@ -10,7 +10,8 @@ use JMS\Serializer\SerializerBuilder;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Class HalapiBuilderTest
+ * Class HalapiBuilderTest.
+ *
  * @author Romain Richard
  */
 class HalapiBuilderTest extends TestCase
@@ -26,7 +27,7 @@ class HalapiBuilderTest extends TestCase
             ->expects($this->once())
             ->method('addSubscriber')
             ->with(new JsonEventSubscriber($relationFactoryMock));
-       
+
         $serializerBuilderMock = $this->createMock(SerializerBuilder::class);
         $serializerBuilderMock->expects($this->once())->method('build')->willReturn(true);
         $serializerBuilderMock
@@ -34,9 +35,9 @@ class HalapiBuilderTest extends TestCase
             ->willReturnCallback(function ($callback) use ($eventDispatcherMock) {
                 $callback($eventDispatcherMock);
         });
-        
+
         $serializerBuilderMock->expects($this->once())->method('addDefaultListeners')->willReturn($serializerBuilderMock);
-        
+
         $halapiBuilder = new HalapiBuilder($relationFactoryMock, $serializerBuilderMock);
         $this->assertTrue($halapiBuilder->getSerializer());
     }

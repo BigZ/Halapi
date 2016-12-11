@@ -46,7 +46,7 @@ class EmbeddedRelationTest extends TestCase
     private $requestStack;
 
     /**
-     * Set up mocks
+     * Set up mocks.
      */
     public function setUp()
     {
@@ -72,7 +72,7 @@ class EmbeddedRelationTest extends TestCase
     }
 
     /**
-     * Name should be _embedded
+     * Name should be _embedded.
      */
     public function testGetName()
     {

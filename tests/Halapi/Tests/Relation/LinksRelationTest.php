@@ -47,7 +47,7 @@ class LinksRelationTest extends TestCase
     private $requestStack;
 
     /**
-     * Set up mocks
+     * Set up mocks.
      */
     public function setUp()
     {
@@ -73,7 +73,7 @@ class LinksRelationTest extends TestCase
     }
 
     /**
-     * This relation should have the name _links
+     * This relation should have the name _links.
      */
     public function testGetName()
     {
@@ -121,7 +121,7 @@ class LinksRelationTest extends TestCase
                     }
                 }
 
-                return null;
+                return;
             })
         ;
 
@@ -199,7 +199,7 @@ class LinksRelationTest extends TestCase
     }
 
     /**
-     * A collection should not have any links
+     * A collection should not have any links.
      */
     public function testArrayHasNoLinks()
     {

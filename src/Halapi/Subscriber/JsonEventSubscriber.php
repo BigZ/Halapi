@@ -25,13 +25,13 @@ class JsonEventSubscriber implements EventSubscriberInterface
      */
     public static function getSubscribedEvents()
     {
-        return array(
-            array(
+        return [
+            [
                 'event' => Events::POST_SERIALIZE,
                 'format' => 'json',
                 'method' => 'onPostSerialize',
-            ),
-        );
+            ],
+        ];
     }
 
     /**
