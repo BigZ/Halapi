@@ -27,11 +27,6 @@ class LinksRelation extends AbstractRelation implements RelationInterface
     private $objectManager;
 
     /**
-     * @var RequestStack
-     */
-    private $requestStack;
-
-    /**
      * @var ClassMetadata
      */
     private $classMetadata;
@@ -47,18 +42,15 @@ class LinksRelation extends AbstractRelation implements RelationInterface
      * @param Reader                $annotationReader
      * @param UrlGeneratorInterface $urlGenerator
      * @param ObjectManager         $objectManager
-     * @param RequestStack          $requestStack
      */
     public function __construct(
         Reader $annotationReader,
         UrlGeneratorInterface $urlGenerator,
-        ObjectManager $objectManager,
-        RequestStack $requestStack
+        ObjectManager $objectManager
     ) {
         $this->urlGenerator = $urlGenerator;
         $this->annotationReader = $annotationReader;
         $this->objectManager = $objectManager;
-        $this->requestStack = $requestStack;
     }
 
     /**

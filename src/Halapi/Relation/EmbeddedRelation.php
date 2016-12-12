@@ -3,7 +3,6 @@
 namespace Halapi\Relation;
 
 use Doctrine\Common\Annotations\Reader;
-use Doctrine\Common\Persistence\ObjectManager;
 use JMS\Serializer\SerializerBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -14,11 +13,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
  */
 class EmbeddedRelation extends AbstractRelation implements RelationInterface
 {
-    /**
-     * @var ObjectManager
-     */
-    private $objectManager;
-
     /**
      * @var RequestStack
      */
@@ -32,17 +26,14 @@ class EmbeddedRelation extends AbstractRelation implements RelationInterface
     /**
      * EmbeddedRelation constructor.
      *
-     * @param Reader        $annotationReader
-     * @param ObjectManager $objectManager
-     * @param RequestStack  $requestStack
+     * @param Reader       $annotationReader
+     * @param RequestStack $requestStack
      */
     public function __construct(
         Reader $annotationReader,
-        ObjectManager $objectManager,
         RequestStack $requestStack
     ) {
         $this->annotationReader = $annotationReader;
-        $this->objectManager = $objectManager;
         $this->requestStack = $requestStack;
         $this->serializer = SerializerBuilder::create()->build();
     }

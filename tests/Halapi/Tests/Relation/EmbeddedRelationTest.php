@@ -4,8 +4,6 @@ namespace Halapi\Tests\Relation;
 
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\Mapping\OneToMany;
 use Halapi\Annotation\Embeddable;
 use Halapi\Relation\EmbeddedRelation;
@@ -32,11 +30,6 @@ class EmbeddedRelationTest extends TestCase
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    private $objectManager;
-
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
-     */
     private $requestStack;
 
     /**
@@ -45,7 +38,6 @@ class EmbeddedRelationTest extends TestCase
     public function setUp()
     {
         $this->annotationReader = $this->createMock(Reader::class);
-        $this->objectManager = $this->createMock(ObjectManager::class);
         $this->requestStack = $this->createMock(RequestStack::class);
     }
 
@@ -56,7 +48,6 @@ class EmbeddedRelationTest extends TestCase
     {
         $embeddedRelation = new EmbeddedRelation(
             $this->annotationReader,
-            $this->objectManager,
             $this->requestStack
         );
 
@@ -70,7 +61,6 @@ class EmbeddedRelationTest extends TestCase
     {
         $embeddedRelation = new EmbeddedRelation(
             $this->annotationReader,
-            $this->objectManager,
             $this->requestStack
         );
 
@@ -82,12 +72,6 @@ class EmbeddedRelationTest extends TestCase
      */
     public function testGetRelation()
     {
-        $classMetadataMock = $this->createMock(ClassMetadata::class);
-        $classMetadataMock->method('getIdentifier')->willReturn(['id']);
-        $this->objectManager
-            ->method('getClassMetadata')
-            ->willReturn($classMetadataMock);
-
         $masterRequestMock = $this->createMock(Request::class);
         $masterRequestMock->expects($this->at(0))->method('get')->with('embed')->willReturn(['doors']);
         $masterRequestMock->expects($this->at(0))->method('get')->with('embed')->willReturn('wrong');
@@ -124,7 +108,6 @@ class EmbeddedRelationTest extends TestCase
 
         $embeddedRelation = new EmbeddedRelation(
             $this->annotationReader,
-            $this->objectManager,
             $this->requestStack
         );
 

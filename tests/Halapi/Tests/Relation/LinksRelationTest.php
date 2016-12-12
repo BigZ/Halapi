@@ -13,7 +13,6 @@ use Halapi\Tests\Fixtures\Entity\BlueCar;
 use Halapi\Tests\Fixtures\Entity\Door;
 use Halapi\Tests\Fixtures\Entity\Engine;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
@@ -39,11 +38,6 @@ class LinksRelationTest extends TestCase
     private $objectManager;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
-     */
-    private $requestStack;
-
-    /**
      * Set up mocks.
      */
     public function setUp()
@@ -51,7 +45,6 @@ class LinksRelationTest extends TestCase
         $this->urlGenerator = $this->createMock(UrlGeneratorInterface::class);
         $this->annotationReader = $this->createMock(Reader::class);
         $this->objectManager = $this->createMock(ObjectManager::class);
-        $this->requestStack = $this->createMock(RequestStack::class);
     }
 
     /**
@@ -62,8 +55,7 @@ class LinksRelationTest extends TestCase
         $linkRelation = new LinksRelation(
             $this->annotationReader,
             $this->urlGenerator,
-            $this->objectManager,
-            $this->requestStack
+            $this->objectManager
         );
 
         $this->assertInstanceOf(RelationInterface::class, $linkRelation);
@@ -77,8 +69,7 @@ class LinksRelationTest extends TestCase
         $linkRelation = new LinksRelation(
             $this->annotationReader,
             $this->urlGenerator,
-            $this->objectManager,
-            $this->requestStack
+            $this->objectManager
         );
 
         $this->assertEquals('_links', $linkRelation->getName());
@@ -135,8 +126,7 @@ class LinksRelationTest extends TestCase
         $linkRelation = new LinksRelation(
             $this->annotationReader,
             $this->urlGenerator,
-            $this->objectManager,
-            $this->requestStack
+            $this->objectManager
         );
 
         $leftDoor = new Door();
@@ -193,8 +183,7 @@ class LinksRelationTest extends TestCase
         $linkRelation = new LinksRelation(
             $this->annotationReader,
             $this->urlGenerator,
-            $this->objectManager,
-            $this->requestStack
+            $this->objectManager
         );
 
         $this->assertNull($linkRelation->getRelation(new ArrayCollection(['test'])));

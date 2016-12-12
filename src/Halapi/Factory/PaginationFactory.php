@@ -2,13 +2,13 @@
 
 namespace Halapi\Factory;
 
+use Doctrine\Common\Persistence\ObjectManager;
 use Halapi\Representation\PaginatedRepresentation;
-use Doctrine\ORM\EntityManagerInterface;
-use Pagerfanta\Adapter\DoctrineORMAdapter;
+use Pagerfanta\Adapter\AdapterInterface;
 use Pagerfanta\Pagerfanta;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * Class PaginationFactory.
@@ -18,14 +18,14 @@ use Symfony\Component\Routing\RouterInterface;
 class PaginationFactory
 {
     /**
-     * @var EntityManagerInterface
+     * @var ObjectManager
      */
-    public $entityManager;
+    public $objectManager;
 
     /**
-     * @var RouterInterface
+     * @var UrlGeneratorInterface
      */
-    public $router;
+    public $urlGenerator;
 
     /**
      * @var RequestStack
@@ -33,20 +33,28 @@ class PaginationFactory
     private $requestStack;
 
     /**
+     * @var string
+     */
+    private $pagerStrategy;
+
+    /**
      * PaginationFactory constructor.
      *
-     * @param RouterInterface        $router
-     * @param EntityManagerInterface $entityManager
-     * @param RequestStack           $requestStack
+     * @param UrlGeneratorInterface $urlGenerator
+     * @param ObjectManager         $objectManager
+     * @param RequestStack          $requestStack
+     * @param string                $pagerStrategy
      */
     public function __construct(
-        RouterInterface $router,
-        EntityManagerInterface $entityManager,
-        RequestStack $requestStack
+        UrlGeneratorInterface $urlGenerator,
+        ObjectManager $objectManager,
+        RequestStack $requestStack,
+        $pagerStrategy = 'ORM'
     ) {
-        $this->router = $router;
-        $this->entityManager = $entityManager;
+        $this->urlGenerator = $urlGenerator;
+        $this->objectManager = $objectManager;
         $this->requestStack = $requestStack;
+        $this->setPagerStrategy($pagerStrategy);
     }
 
     /**
@@ -58,12 +66,21 @@ class PaginationFactory
      */
     public function getRepresentation($className)
     {
-        $repository = $this->entityManager->getRepository($className);
+        $shortName = (new \ReflectionClass($className))->getShortName();
+        $repository = $this->objectManager->getRepository($className);
+        if (!is_callable([$repository, 'findAllSorted'])) {
+            throw new \BadMethodCallException(sprintf(
+                "Your repository for the object %s must implement the 'findAllSorted' method
+                \n
+                Prototype: findAllSorted(array \$sorting, array \$filterValues, array \$filerOperators)",
+                $shortName
+            ));
+        }
+
         list($page, $limit, $sorting, $filterValues, $filerOperators) = array_values($this->addPaginationParams());
         $queryBuilder = $repository->findAllSorted($sorting, $filterValues, $filerOperators);
-        $shortName = (new \ReflectionClass($className))->getShortName();
 
-        $pagerAdapter = new DoctrineORMAdapter($queryBuilder);
+        $pagerAdapter = $this->getPagerAdapter($queryBuilder);
         $pager = new Pagerfanta($pagerAdapter);
         $pager->setMaxPerPage($limit);
         $pager->setCurrentPage($page);
@@ -84,6 +101,34 @@ class PaginationFactory
             ],
             (array) $pager->getCurrentPageResults()
         );
+    }
+
+    /**
+     * @param string $pagerStrategy
+     */
+    public function setPagerStrategy($pagerStrategy)
+    {
+        if (!class_exists('Pagerfanta\Adapter\Doctrine'.$pagerStrategy.'Adapter')) {
+            throw new \InvalidArgumentException(sprintf(
+                'No adapter named %s found in %s namespace',
+                'Doctrine'.$pagerStrategy.'Adapter',
+                'Pagerfanta\Adapter'
+            ));
+        }
+
+        $this->pagerStrategy = $pagerStrategy;
+    }
+
+    /**
+     * @param object $queryBuilder
+     *
+     * @return AdapterInterface
+     */
+    private function getPagerAdapter($queryBuilder)
+    {
+        $adapterClassName = 'Pagerfanta\Adapter\Doctrine'.$this->pagerStrategy.'Adapter';
+
+        return new $adapterClassName($queryBuilder);
     }
 
     /**
@@ -132,7 +177,7 @@ class PaginationFactory
      */
     private function getPaginatedRoute($name, $limit, $page, $sorting)
     {
-        return $this->router->generate(
+        return $this->urlGenerator->generate(
             'get_'.strtolower($name).'s',
             [
                 'sorting' => $sorting,
