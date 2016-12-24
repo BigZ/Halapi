@@ -6,8 +6,8 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\Common\Annotations\Reader;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Halapi\Annotation\Embeddable;
+use Halapi\UrlGenerator\UrlGeneratorInterface;
 
 /**
  * Class LinksRelation.
@@ -94,12 +94,11 @@ class LinksRelation extends AbstractRelation implements RelationInterface
     private function getRelationLink(\ReflectionProperty $property, $relationContent)
     {
         if ($this->classMetadata->hasAssociation($property->getName())) {
-            $targetClass = $this->classMetadata->getAssociationTargetClass($property->getName());
-            $shortName = strtolower((new \ReflectionClass($targetClass))->getShortName());
+            $identifier = $this->getIdentifier($relationContent);
 
             return $this->urlGenerator->generate(
-                'get_'.$shortName,
-                [$shortName => $this->getEntityId($relationContent)]
+                $this->getAssociationRouteName($property),
+                [$identifier => $this->getId($relationContent, $identifier)]
             );
         }
     }
@@ -108,7 +107,6 @@ class LinksRelation extends AbstractRelation implements RelationInterface
      * Get the url of an entity based on the 'get_entity' route pattern.
      *
      * @param $resource
-     * @param \ReflectionClass $reflectionClass
      *
      * @return array|null
      */
@@ -118,10 +116,12 @@ class LinksRelation extends AbstractRelation implements RelationInterface
             return;
         }
 
+        $identifier = $this->getIdentifier($resource);
+
         return [
             'self' => $this->urlGenerator->generate(
-                'get_'.strtolower($this->reflectionClass->getShortName()),
-                [strtolower($this->reflectionClass->getShortName()) => $this->getEntityId($resource)]
+                $this->getResourceRouteName($this->reflectionClass),
+                [$identifier => $this->getId($resource, $identifier)]
             ),
         ];
     }
@@ -149,17 +149,64 @@ class LinksRelation extends AbstractRelation implements RelationInterface
     }
 
     /**
-     * Returns entity single identifier.
-     * This is a compatibility-limiting feature as it will not be able to get the identity
-     * of an entity which has multiple identifiers.
+     * Return the configured route name for an embeddable relation.
      *
-     * @param $entity
+     * @param \ReflectionProperty $property
+     *
+     * @return string
      */
-    private function getEntityId($entity)
+    private function getAssociationRouteName(\ReflectionProperty $property)
     {
-        $identifier = $this->classMetadata->getIdentifier()[0];
-        $getter = 'get'.ucfirst($identifier);
+        if ($routeName = $this->annotationReader->getPropertyAnnotation($property, Embeddable::class)->getRouteName()) {
+            return $routeName;
+        }
 
-        return $entity->$getter();
+        return $this->getResourceRouteName(new \ReflectionClass(
+            $this->classMetadata->getAssociationTargetClass($property->getName())
+        ));
+    }
+
+    /**
+     * Return the configured route name for a resource, or get_*entityShortName* by default.
+     *
+     * @param \ReflectionClass $resource
+     *
+     * @return string
+     */
+    private function getResourceRouteName(\ReflectionClass $resource)
+    {
+        if ($routeName = $this->annotationReader->getClassAnnotation($resource, Embeddable::class)->getRouteName()) {
+            return $routeName;
+        }
+
+        return 'get_'.strtolower($resource->getShortName());
+    }
+
+    /**
+     * @param $resource
+     *
+     * @return mixed
+     */
+    private function getIdentifier($resource)
+    {
+        $classMetadata = $this->objectManager->getClassMetadata(get_class($resource));
+
+        return $classMetadata->getIdentifier()[0];
+    }
+
+    private function getId($resource, $identifier)
+    {
+        $id = new \ReflectionProperty($resource, $identifier);
+        if ($id->isPublic()) {
+            return $id;
+        }
+
+        $getter = 'get'.ucfirst($identifier);
+        $getterReflection = new \ReflectionMethod($resource, $getter);
+        if (method_exists($resource, $getter) && $getterReflection->isPublic()) {
+            return $resource->$getter();
+        }
+
+        return;
     }
 }

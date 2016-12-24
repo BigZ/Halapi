@@ -13,7 +13,7 @@ use Halapi\Tests\Fixtures\Entity\BlueCar;
 use Halapi\Tests\Fixtures\Entity\Door;
 use Halapi\Tests\Fixtures\Entity\Engine;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Halapi\UrlGenerator\UrlGeneratorInterface;
 
 /**
  * Class LinksRelationTest.
@@ -76,7 +76,7 @@ class LinksRelationTest extends TestCase
     }
 
     /**
-     * Blue car has 2 doors.
+     * Blue car has 2 doors and a V8 engine.
      */
     public function testGetRelation()
     {
@@ -101,21 +101,49 @@ class LinksRelationTest extends TestCase
             ->willReturnCallback(function ($routeName, $parameters) {
                 $route = explode('_', $routeName);
 
-                return '/'.$route[1].'s/'.$parameters[$route[1]];
+                return '/'.$route[1].'s/'.$parameters['id'];
             })
         ;
 
         // Are the properties of a bluecar embedable ?
-        $reflectionClass = new \ReflectionClass(new BlueCar());
+        $blueCarReflectionClass = new \ReflectionClass(new BlueCar());
+        $engineReflectionClass = new \ReflectionClass(new Engine());
         $this->annotationReader
             ->method('getPropertyAnnotation')
-            ->willReturnCallback(function ($property, $class) use ($reflectionClass) {
+            ->willReturnCallback(function ($property, $class) use ($blueCarReflectionClass) {
                 if (Embeddable::class === $class) {
                     switch ($property) {
-                        case $reflectionClass->getProperty('doors'):
-                            return true;
-                        case $reflectionClass->getProperty('engine'):
-                            return true;
+                        case $blueCarReflectionClass->getProperty('doors'):
+                            $embedabbleMock = $this->createMock(Embeddable::class);
+                            $embedabbleMock->method('getRouteName')->willReturn('customget_door');
+
+                            return $embedabbleMock;
+                        case $blueCarReflectionClass->getProperty('engine'):
+                            $embedabbleMock = $this->createMock(Embeddable::class);
+                            $embedabbleMock->method('getRouteName')->willReturn(null);
+
+                            return $embedabbleMock;
+                    }
+                }
+
+                return;
+            })
+        ;
+        $this->annotationReader
+            ->method('getClassAnnotation')
+            ->willReturnCallback(function ($resource, $class) use ($blueCarReflectionClass, $engineReflectionClass) {
+                if (Embeddable::class === $class) {
+                    switch ($resource) {
+                        case $blueCarReflectionClass:
+                            $embedabbleMock = $this->createMock(Embeddable::class);
+                            $embedabbleMock->method('getRouteName')->willReturn('customget_bluecar');
+
+                            return $embedabbleMock;
+                        case $engineReflectionClass:
+                            $embedabbleMock = $this->createMock(Embeddable::class);
+                            $embedabbleMock->method('getRouteName')->willReturn(null);
+
+                            return $embedabbleMock;
                     }
                 }
 
