@@ -4,9 +4,9 @@ namespace Halapi\Relation;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\Common\Annotations\Reader;
 use Halapi\Annotation\Embeddable;
+use Halapi\ObjectManager\ObjectManagerInterface;
 use Halapi\UrlGenerator\UrlGeneratorInterface;
 
 /**
@@ -22,7 +22,7 @@ class LinksRelation extends AbstractRelation implements RelationInterface
     private $urlGenerator;
 
     /**
-     * @var ObjectManager
+     * @var ObjectManagerInterface
      */
     private $objectManager;
 
@@ -39,14 +39,14 @@ class LinksRelation extends AbstractRelation implements RelationInterface
     /**
      * AbstractRelation constructor.
      *
-     * @param Reader                $annotationReader
-     * @param UrlGeneratorInterface $urlGenerator
-     * @param ObjectManager         $objectManager
+     * @param Reader                 $annotationReader
+     * @param UrlGeneratorInterface  $urlGenerator
+     * @param ObjectManagerInterface $objectManager
      */
     public function __construct(
         Reader $annotationReader,
         UrlGeneratorInterface $urlGenerator,
-        ObjectManager $objectManager
+        ObjectManagerInterface $objectManager
     ) {
         $this->urlGenerator = $urlGenerator;
         $this->annotationReader = $annotationReader;
@@ -94,17 +94,15 @@ class LinksRelation extends AbstractRelation implements RelationInterface
     private function getRelationLink(\ReflectionProperty $property, $relationContent)
     {
         if ($this->classMetadata->hasAssociation($property->getName())) {
-            $identifier = $this->getIdentifier($relationContent);
-
             return $this->urlGenerator->generate(
                 $this->getAssociationRouteName($property),
-                [$identifier => $this->getId($relationContent, $identifier)]
+                [$this->objectManager->getIdentifierName($relationContent) => $this->objectManager->getIdentifier($relationContent)]
             );
         }
     }
 
     /**
-     * Get the url of an entity based on the 'get_entity' route pattern.
+     * Get the url of an entity.
      *
      * @param $resource
      *
@@ -116,12 +114,10 @@ class LinksRelation extends AbstractRelation implements RelationInterface
             return;
         }
 
-        $identifier = $this->getIdentifier($resource);
-
         return [
             'self' => $this->urlGenerator->generate(
                 $this->getResourceRouteName($this->reflectionClass),
-                [$identifier => $this->getId($resource, $identifier)]
+                [$this->objectManager->getIdentifierName($resource) => $this->objectManager->getIdentifier($resource)]
             ),
         ];
     }
@@ -180,33 +176,5 @@ class LinksRelation extends AbstractRelation implements RelationInterface
         }
 
         return 'get_'.strtolower($resource->getShortName());
-    }
-
-    /**
-     * @param $resource
-     *
-     * @return mixed
-     */
-    private function getIdentifier($resource)
-    {
-        $classMetadata = $this->objectManager->getClassMetadata(get_class($resource));
-
-        return $classMetadata->getIdentifier()[0];
-    }
-
-    private function getId($resource, $identifier)
-    {
-        $id = new \ReflectionProperty($resource, $identifier);
-        if ($id->isPublic()) {
-            return $id;
-        }
-
-        $getter = 'get'.ucfirst($identifier);
-        $getterReflection = new \ReflectionMethod($resource, $getter);
-        if (method_exists($resource, $getter) && $getterReflection->isPublic()) {
-            return $resource->$getter();
-        }
-
-        return;
     }
 }

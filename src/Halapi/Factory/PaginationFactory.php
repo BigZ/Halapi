@@ -2,7 +2,7 @@
 
 namespace Halapi\Factory;
 
-use Doctrine\Common\Persistence\ObjectManager;
+use Halapi\ObjectManager\ObjectManagerInterface;
 use Halapi\Representation\PaginatedRepresentation;
 use Pagerfanta\Adapter\AdapterInterface;
 use Pagerfanta\Pagerfanta;
@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class PaginationFactory
 {
     /**
-     * @var ObjectManager
+     * @var ObjectManagerInterface
      */
     public $objectManager;
 
@@ -40,14 +40,14 @@ class PaginationFactory
     /**
      * PaginationFactory constructor.
      *
-     * @param UrlGeneratorInterface $urlGenerator
-     * @param ObjectManager         $objectManager
-     * @param RequestStack          $requestStack
-     * @param string                $pagerStrategy
+     * @param UrlGeneratorInterface  $urlGenerator
+     * @param ObjectManagerInterface $objectManager
+     * @param RequestStack           $requestStack
+     * @param string                 $pagerStrategy
      */
     public function __construct(
         UrlGeneratorInterface $urlGenerator,
-        ObjectManager $objectManager,
+        ObjectManagerInterface $objectManager,
         RequestStack $requestStack,
         $pagerStrategy = 'ORM'
     ) {
@@ -59,7 +59,7 @@ class PaginationFactory
 
     /**
      * Get a paginated representation of a collection of entities.
-     *
+     * Your repository for the object $className must implement the 'findAllSorted' method
      * @param string $className
      *
      * @return PaginatedRepresentation
