@@ -89,7 +89,6 @@ class LinksRelation extends AbstractRelation implements RelationInterface
      *
      * @return string|null
      *
-     * @throws \Doctrine\ORM\Mapping\MappingException
      */
     private function getRelationLink(\ReflectionProperty $property, $relationContent)
     {

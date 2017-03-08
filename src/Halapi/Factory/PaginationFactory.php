@@ -8,7 +8,7 @@ use Pagerfanta\Adapter\AdapterInterface;
 use Pagerfanta\Pagerfanta;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Halapi\UrlGenerator\UrlGeneratorInterface;
 
 /**
  * Class PaginationFactory.
@@ -49,7 +49,7 @@ class PaginationFactory
         UrlGeneratorInterface $urlGenerator,
         ObjectManagerInterface $objectManager,
         RequestStack $requestStack,
-        $pagerStrategy = 'ORM'
+        $pagerStrategy = 'DoctrineORM'
     ) {
         $this->urlGenerator = $urlGenerator;
         $this->objectManager = $objectManager;
@@ -67,20 +67,10 @@ class PaginationFactory
     public function getRepresentation($className)
     {
         $shortName = (new \ReflectionClass($className))->getShortName();
-        $repository = $this->objectManager->getRepository($className);
-        if (!is_callable([$repository, 'findAllSorted'])) {
-            throw new \BadMethodCallException(sprintf(
-                "Your repository for the object %s must implement the 'findAllSorted' method
-                \n
-                Prototype: findAllSorted(array \$sorting, array \$filterValues, array \$filerOperators)",
-                $shortName
-            ));
-        }
-
         list($page, $limit, $sorting, $filterValues, $filerOperators) = array_values($this->addPaginationParams());
-        $queryBuilder = $repository->findAllSorted($sorting, $filterValues, $filerOperators);
+        $results = $this->objectManager->findAllSorted($className, $sorting, $filterValues, $filerOperators);
 
-        $pagerAdapter = $this->getPagerAdapter($queryBuilder);
+        $pagerAdapter = $this->getPagerAdapter($results);
         $pager = new Pagerfanta($pagerAdapter);
         $pager->setMaxPerPage($limit);
         $pager->setCurrentPage($page);
@@ -108,7 +98,7 @@ class PaginationFactory
      */
     public function setPagerStrategy($pagerStrategy)
     {
-        if (!class_exists('Pagerfanta\Adapter\Doctrine'.$pagerStrategy.'Adapter')) {
+        if (!class_exists('Pagerfanta\Adapter\\'.$pagerStrategy.'Adapter')) {
             throw new \InvalidArgumentException(sprintf(
                 'No adapter named %s found in %s namespace',
                 'Doctrine'.$pagerStrategy.'Adapter',
@@ -120,15 +110,15 @@ class PaginationFactory
     }
 
     /**
-     * @param object $queryBuilder
+     * @param array $results
      *
      * @return AdapterInterface
      */
-    private function getPagerAdapter($queryBuilder)
+    private function getPagerAdapter($results)
     {
-        $adapterClassName = 'Pagerfanta\Adapter\Doctrine'.$this->pagerStrategy.'Adapter';
+        $adapterClassName = 'Pagerfanta\Adapter\\'.$this->pagerStrategy.'Adapter';
 
-        return new $adapterClassName($queryBuilder);
+        return new $adapterClassName(...$results);
     }
 
     /**

@@ -15,18 +15,22 @@ HAL is a json presentation format of the HATEOAS constraint, which is meant to a
 
 It's whole specification is available here http://stateless.co/hal_specification.html
 
-This library uses jms_serializer to serialize objects in json.
+The work is in progress to make it framework agnostic but actually relies on you using symfony/http-foundation, which will change in a close future to use psr6 (while providing a bridge)
+For the object manager, you are free to choose the one you like, although only doctrine orm has been implemented at the mement.
+Relation findings relies also a lot on doctrine's ClassMetadata interface, that we should maybe abstract (you can still use your own implementaion)
+
+best used with https://github.com/BigZ/HalapiBundle
 
 ```
 use Doctrine\Common\Annotations\Reader;
-use Doctrine\ORM\EntityManagerInterface;
+use Halapi\ObjectManager\ObjectManagerInterface;
+use Halapi\UrlGenerator\UrlGeneratorInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\RouterInterface;
 
 public function __construct(
-    RouterInterface $router,
+    UrlGeneratorInterface $router,
     Reader $annotationReader,
-    EntityManagerInterface $entityManager,
+    ObjectManagerInterface $entityManager,
     RequestStack $requestStack
 ) {
     $this->router = $router;
@@ -41,7 +45,6 @@ public function SerializeEntityWithHal(Entity $entity)
         $this->router,
         $this->annotationReader,
         $this->entityManager,
-        $this->requestStack
     );
     $embeddedRelation = new EmbeddedRelation(
         $this->router,

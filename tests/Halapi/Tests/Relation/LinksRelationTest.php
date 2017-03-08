@@ -7,6 +7,7 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\ObjectManager;
 use Halapi\Annotation\Embeddable;
 use Halapi\ObjectManager\DoctrineObjectManager;
+use Halapi\ObjectManager\DoctrineOrmObjectManager;
 use Halapi\ObjectManager\ObjectManagerInterface;
 use Halapi\Relation\LinksRelation;
 use Halapi\Relation\RelationInterface;
@@ -46,7 +47,7 @@ class LinksRelationTest extends TestCase
     {
         $this->urlGenerator = $this->createMock(UrlGeneratorInterface::class);
         $this->annotationReader = $this->createMock(Reader::class);
-        $this->objectManager = $this->createMock(DoctrineObjectManager::class);
+        $this->objectManager = $this->createMock(DoctrineOrmObjectManager::class);
     }
 
     /**

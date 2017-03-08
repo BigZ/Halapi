@@ -21,11 +21,14 @@ interface ObjectManagerInterface
     public function getIdentifierName($resource);
 
     /**
-     * Get the related object repository (which must implement getAllPaginated)
      * @param string $className
-     * @return mixed
+     * @param array  $sorting
+     * @param array  $filterValues
+     * @param array  $filerOperators
+     *
+     * @return array
      */
-    public function getRepository($className);
+    public function findAllSorted($className, array $sorting, array $filterValues, array $filerOperators);
 
     /**
      * @param string $className
