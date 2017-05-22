@@ -19,7 +19,16 @@ The work is in progress to make it framework agnostic but actually relies on you
 For the object manager, you are free to choose the one you like, although only doctrine orm has been implemented at the mement.
 Relation findings relies also a lot on doctrine's ClassMetadata interface, that we should maybe abstract (you can still use your own implementaion)
 
-best used with https://github.com/BigZ/HalapiBundle
+# Usage
+`composer req bigz/halapi`
+
+## Symfony bundle
+https://github.com/BigZ/HalapiBundle
+
+## Full fledged example using symfony (a good starting point for your api)
+https://github.com/BigZ/promote-api
+
+# Example
 
 ```
 use Doctrine\Common\Annotations\Reader;
@@ -27,63 +36,141 @@ use Halapi\ObjectManager\ObjectManagerInterface;
 use Halapi\UrlGenerator\UrlGeneratorInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-public function __construct(
-    UrlGeneratorInterface $router,
-    Reader $annotationReader,
-    ObjectManagerInterface $entityManager,
-    RequestStack $requestStack
-) {
-    $this->router = $router;
-    $this->annotationReader = $annotationReader;
-    $this->entityManager = $entityManager;
-    $this->requestStack = $requestStack;
-}
-
-public function SerializeEntityWithHal(Entity $entity)
+class EntityController()
 {
-    $linksRelation = new LinksRelation(
-        $this->router,
-        $this->annotationReader,
-        $this->entityManager,
-    );
-    $embeddedRelation = new EmbeddedRelation(
-        $this->router,
-        $this->annotationReader,
-        $this->entityManager,
-        $this->requestStack
-    );
+    /**
+     * You can provide your own implementations of those interfaces or use the provided ones.
+     */
+    public function __construct(
+        UrlGeneratorInterface $router,
+        Reader $annotationReader,
+        ObjectManagerInterface $entityManager,
+        RequestStack $requestStack
+    ) {
+        $this->router = $router;
+        $this->annotationReader = $annotationReader;
+        $this->entityManager = $entityManager;
+        $this->requestStack = $requestStack;
+    }
 
-    $relationFactory = new RelationFactory([$linksRelation, $embeddedRelation]);
-    $builder = new HALAPIBuilder($relationFactory);
+    /**
+     * Accessed by the /entities/{id} route
+     */
+    public function getHalFormattedEntity(Entity $entity)
+    {
+        $linksRelation = new LinksRelation(
+            $this->router,
+            $this->annotationReader,
+            $this->entityManager,
+        );
+        $embeddedRelation = new EmbeddedRelation(
+            $this->router,
+            $this->annotationReader,
+            $this->entityManager,
+            $this->requestStack
+        );
 
-    return $builder->gerSerializer()->serialize($entity);
-}
+        $relationFactory = new RelationFactory([$linksRelation, $embeddedRelation]);
+        $builder = new HALAPIBuilder($relationFactory);
 
-public function SerializePaginatedCollectionWithHal($entityName)
-{
-    $linksRelation = new LinksRelation(
-        $this->router,
-        $this->annotationReader,
-        $this->entityManager,
-        $this->requestStack
-    );
-    $embeddedRelation = new EmbeddedRelation(
-        $this->router,
-        $this->annotationReader,
-        $this->entityManager,
-        $this->requestStack
-    );
+        return $builder->gerSerializer()->serialize($entity);
+    }
 
-    $relationFactory = new RelationFactory([$linksRelation, $embeddedRelation]);
-    $builder = new HALAPIBuilder($relationFactory);
+    /**
+     * Accessed by the /entities
+     */
+    public function getHalFormattedCollection($entityName)
+    {
+        $linksRelation = new LinksRelation(
+            $this->router,
+            $this->annotationReader,
+            $this->entityManager,
+            $this->requestStack
+        );
+        $embeddedRelation = new EmbeddedRelation(
+            $this->router,
+            $this->annotationReader,
+            $this->entityManager,
+            $this->requestStack
+        );
 
-    $paginationFactory = new PaginationFactory(
-        $this->router,
-        $this->annotationReader,
-        $this->entityManager
-    );
-    $paginatedRepresentation = $paginationFactory->getRepresentation($entityName);
+        $relationFactory = new RelationFactory([$linksRelation, $embeddedRelation]);
+        $builder = new HALAPIBuilder($relationFactory);
 
-    return $builder->gerSerializer()->serialize($paginatedRepresentation);
+        $paginationFactory = new PaginationFactory(
+            $this->router,
+            $this->annotationReader,
+            $this->entityManager
+        );
+        $paginatedRepresentation = $paginationFactory->getRepresentation($entityName);
+
+        return $builder->gerSerializer()->serialize($paginatedRepresentation);
+    }
 }
 ```
+
+## Resources
+
+### List
+
+#### Pagination
+A list will give you a paginated ressource, HAL formatted.
+
+`/entities?page=2&limite&sorting[id]=desc`
+
+#### Filtering
+You can filter out results on specific fields.
+
+`/entities?filtervalue[id]=5&filteroperator[id]=>`
+
+Available operators are `>`, `<`, `>=`, `<=`, `=`, `!=`
+
+
+#### Sorting
+You can sort the result by any property
+
+`/entities?sorting[id]=asc`
+
+### Entity
+#### Creating new entities
+`POST /entities`
+
+`{
+     "entity": {
+         "name": "eminem",
+         "slug": "eminem",
+         "bio": "rapper from detroit",
+         "labels": [1, 2]
+     }
+ }`
+
+ will return
+
+`{
+   "id": 2,
+   "name": "eminem",
+   "slug": "eminem",
+   "bio": "rapper from detroit",
+   "_links": {
+     "self": "/artists/2",
+     "labels": [
+       "/labels/1",
+       "/labels/2"
+     ]
+   }
+ }`
+
+PUT & PATCH works the same way
+
+#### Embedding
+
+By default, relations are not embeded. You can change this behaviour by specifiying wich embedeed entities you need.
+
+`/entities/1?embed[]=gigs&embed[]=labels`
+
+# Roadmap
+
+- Move from symfony/http-foundation to psr6
+- Provide a custom interface for the annotation reader - or should we support many types of configuration ?
+- Untie from Jms serializer
+- Move from array type parameters such as filtervalue[id] to something in compatible with the openapi specs
