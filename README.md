@@ -174,3 +174,4 @@ By default, relations are not embeded. You can change this behaviour by specifiy
 - Provide a custom interface for the annotation reader - or should we support many types of configuration ?
 - Untie from Jms serializer
 - Move from array type parameters such as filtervalue[id] to something in compatible with the openapi specs
+- Be able to chose output format: HAL, JsonApi, ...

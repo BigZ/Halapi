@@ -152,8 +152,10 @@ class LinksRelation extends AbstractRelation implements RelationInterface
      */
     private function getAssociationRouteName(\ReflectionProperty $property)
     {
-        if ($routeName = $this->annotationReader->getPropertyAnnotation($property, Embeddable::class)->getRouteName()) {
-            return $routeName;
+        $annotation = $this->annotationReader->getPropertyAnnotation($property, Embeddable::class);
+
+        if ($annotation && $annotation->getRouteName()) {
+            return $annotation->getRouteName();
         }
 
         return $this->getResourceRouteName(new \ReflectionClass(
@@ -170,8 +172,10 @@ class LinksRelation extends AbstractRelation implements RelationInterface
      */
     private function getResourceRouteName(\ReflectionClass $resource)
     {
-        if ($routeName = $this->annotationReader->getClassAnnotation($resource, Embeddable::class)->getRouteName()) {
-            return $routeName;
+        $annotation = $this->annotationReader->getClassAnnotation($resource, Embeddable::class);
+
+        if ($annotation && $annotation->getRouteName()) {
+            return $annotation->getRouteName();
         }
 
         return 'get_'.strtolower($resource->getShortName());

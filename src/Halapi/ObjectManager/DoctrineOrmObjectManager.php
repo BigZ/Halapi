@@ -78,31 +78,31 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
         $repository = $this->objectManager->getRepository($className);
 
         // If user's own implementation is defined, use it
-        if (is_callable(array($repository, 'findAllSorted'))) {
+        try {
             return $repository->findAllSorted($className, $sorting, $filterValues, $filerOperators);
-        }
+        } catch (\BadMethodCallException $exception) {
+            $queryBuilder = $repository->createQueryBuilder('e');
 
-        $queryBuilder = $repository->createQueryBuilder('e');
-
-        foreach ($fields as $field) {
-            if (isset($sorting[$field])) {
-                $direction = ($sorting[$field] === 'asc') ? 'asc' : 'desc';
-                $queryBuilder->addOrderBy('e.'.$field, $direction);
-            }
-
-            if (isset($filterValues[$field])) {
-                $operator = '=';
-
-                if (isset($filerOperators[$field])
-                    && in_array($filerOperators[$field], ['>', '<', '>=', '<=', '=', '!='])
-                ) {
-                    $operator = $filerOperators[$field];
+            foreach ($fields as $field) {
+                if (isset($sorting[$field])) {
+                    $direction = ($sorting[$field] === 'asc') ? 'asc' : 'desc';
+                    $queryBuilder->addOrderBy('e.'.$field, $direction);
                 }
 
-                $queryBuilder->andWhere('e.'.$field.$operator."'".$filterValues[$field]."'");
-            }
-        }
+                if (isset($filterValues[$field])) {
+                    $operator = '=';
 
-        return [$queryBuilder];
+                    if (isset($filerOperators[$field])
+                        && in_array($filerOperators[$field], ['>', '<', '>=', '<=', '=', '!='])
+                    ) {
+                        $operator = $filerOperators[$field];
+                    }
+
+                    $queryBuilder->andWhere('e.'.$field.$operator."'".$filterValues[$field]."'");
+                }
+            }
+
+            return [$queryBuilder];
+        }
     }
 }
