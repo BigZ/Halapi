@@ -92,10 +92,14 @@ class LinksRelation extends AbstractRelation implements RelationInterface
      */
     private function getRelationLink(\ReflectionProperty $property, $relationContent)
     {
+        $relationReflection = new \ReflectionClass($relationContent);
         if ($this->classMetadata->hasAssociation($property->getName())) {
             return $this->urlGenerator->generate(
                 $this->getAssociationRouteName($property),
-                [$this->objectManager->getIdentifierName($relationContent) => $this->objectManager->getIdentifier($relationContent)]
+                [
+                    strtolower($relationReflection->getShortName()) =>
+                        $this->objectManager->getIdentifier($relationContent),
+                ]
             );
         }
     }
@@ -116,7 +120,10 @@ class LinksRelation extends AbstractRelation implements RelationInterface
         return [
             'self' => $this->urlGenerator->generate(
                 $this->getResourceRouteName($this->reflectionClass),
-                [$this->objectManager->getIdentifierName($resource) => $this->objectManager->getIdentifier($resource)]
+                [
+                    strtolower($this->reflectionClass->getShortName()) =>
+                        $this->objectManager->getIdentifier($resource),
+                ]
             ),
         ];
     }

@@ -112,8 +112,9 @@ class LinksRelationTest extends TestCase
             ->method('generate')
             ->willReturnCallback(function ($routeName, $parameters) {
                 $route = explode('_', $routeName);
+                var_dump($route, $parameters);
 
-                return '/'.$route[1].'s/'.$parameters['id'];
+                return '/'.$route[1].'s/'.$parameters[$route[1]];
             })
         ;
 

@@ -30,9 +30,10 @@ class SymfonyUrlGenerator implements UrlGeneratorInterface
      * @param string $name
      * @param array  $parameters
      * @param int    $referenceType
+     * @return string
      */
     public function generate($name, $parameters = array(), $referenceType = self::ABSOLUTE_PATH)
     {
-        $this->generator->generate($name, $parameters, $referenceType);
+        return $this->generator->generate($name, $parameters, $referenceType);
     }
 }

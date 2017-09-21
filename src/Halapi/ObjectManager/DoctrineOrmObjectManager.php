@@ -41,12 +41,12 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
      */
     public function getIdentifier($resource)
     {
-        $identifier = new \ReflectionProperty($resource, $this->getIdentifier($resource));
+        $identifier = new \ReflectionProperty($resource, $this->getIdentifierName($resource));
         if ($identifier->isPublic()) {
             return $identifier;
         }
 
-        $getter = 'get'.ucfirst($identifier);
+        $getter = 'get'.ucfirst($identifier->getName());
         $getterReflection = new \ReflectionMethod($resource, $getter);
         if (method_exists($resource, $getter) && $getterReflection->isPublic()) {
             return $resource->$getter();
