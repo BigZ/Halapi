@@ -4,7 +4,7 @@ namespace Halapi\Relation;
 
 use Doctrine\Common\Annotations\Reader;
 use JMS\Serializer\SerializerBuilder;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Class EmbeddedRelation.
@@ -14,9 +14,9 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class EmbeddedRelation extends AbstractRelation implements RelationInterface
 {
     /**
-     * @var RequestStack
+     * @var ServerRequestInterface
      */
-    private $requestStack;
+    private $request;
 
     /**
      * @var \JMS\Serializer\Serializer
@@ -26,15 +26,15 @@ class EmbeddedRelation extends AbstractRelation implements RelationInterface
     /**
      * EmbeddedRelation constructor.
      *
-     * @param Reader       $annotationReader
-     * @param RequestStack $requestStack
+     * @param Reader                 $annotationReader
+     * @param ServerRequestInterface $request
      */
     public function __construct(
         Reader $annotationReader,
-        RequestStack $requestStack
+        ServerRequestInterface $request
     ) {
         $this->annotationReader = $annotationReader;
-        $this->requestStack = $requestStack;
+        $this->request = $request;
         $this->serializer = SerializerBuilder::create()->build();
     }
 
@@ -97,14 +97,8 @@ class EmbeddedRelation extends AbstractRelation implements RelationInterface
      */
     private function getEmbeddedParams()
     {
-        $request = $this->requestStack->getMasterRequest();
+        $queryParams = $this->request->getQueryParams();
 
-        $embed = $request->get('embed');
-
-        if (!is_array($embed)) {
-            return [];
-        }
-
-        return $embed;
+        return isset($queryParams['embed']) && is_array($queryParams['embed']) ? $queryParams['embed'] : [];
     }
 }

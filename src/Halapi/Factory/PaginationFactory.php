@@ -6,9 +6,9 @@ use Halapi\ObjectManager\ObjectManagerInterface;
 use Halapi\Representation\PaginatedRepresentation;
 use Pagerfanta\Adapter\AdapterInterface;
 use Pagerfanta\Pagerfanta;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Halapi\UrlGenerator\UrlGeneratorInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Class PaginationFactory.
@@ -28,9 +28,9 @@ class PaginationFactory
     public $urlGenerator;
 
     /**
-     * @var RequestStack
+     * @var ServerRequestInterface
      */
-    private $requestStack;
+    private $request;
 
     /**
      * @var string
@@ -42,18 +42,18 @@ class PaginationFactory
      *
      * @param UrlGeneratorInterface  $urlGenerator
      * @param ObjectManagerInterface $objectManager
-     * @param RequestStack           $requestStack
+     * @param ServerRequestInterface $request
      * @param string                 $pagerStrategy
      */
     public function __construct(
         UrlGeneratorInterface $urlGenerator,
         ObjectManagerInterface $objectManager,
-        RequestStack $requestStack,
+        ServerRequestInterface $request,
         $pagerStrategy = 'DoctrineORM'
     ) {
         $this->urlGenerator = $urlGenerator;
         $this->objectManager = $objectManager;
-        $this->requestStack = $requestStack;
+        $this->request = $request;
         $this->setPagerStrategy($pagerStrategy);
     }
 
@@ -144,14 +144,14 @@ class PaginationFactory
         $resolver->setAllowedTypes('filtervalue', ['NULL', 'array']);
         $resolver->setAllowedTypes('filteroperator', ['NULL', 'array']);
 
-        $request = $this->requestStack->getMasterRequest();
+        $queryParams = $this->request->getQueryParams();
 
         return $resolver->resolve(array_filter([
-            'page' => $request->query->get('page'),
-            'limit' => $request->query->get('limit'),
-            'sorting' => $request->query->get('sorting'),
-            'filtervalue' => $request->query->get('filtervalue'),
-            'filteroperator' => $request->query->get('filteroperator'),
+            'page' => isset($queryParams['page']) ? $queryParams['page'] : '',
+            'limit' => isset($queryParams['limit']) ? $queryParams['limit'] : '',
+            'sorting' => isset($queryParams['sorting']) ? $queryParams['sorting'] : '',
+            'filtervalue' => isset($queryParams['filtervalue']) ? $queryParams['filtervalue'] : '',
+            'filteroperator' => isset($queryParams['filteroperator']) ? $queryParams['filteroperator'] : '',
         ]));
     }
 

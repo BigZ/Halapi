@@ -165,13 +165,37 @@ PUT & PATCH works the same way
 #### Embedding
 
 By default, relations are not embeded. You can change this behaviour by specifiying wich embedeed entities you need.
-
 `/entities/1?embed[]=gigs&embed[]=labels`
+
+To allow an relation to be embedded, you must add an `@Embeddable` Annotation to your entity property.
+
+```
+use Halapi\Annotation\Embeddable;
+
+class Artist
+{
+    /**
+     * @var int
+     *
+     * @Expose
+     */
+    private $id;
+
+    /**
+     * @var Labels[]
+     *
+     * @Embeddable
+     */
+    protected $labels;
+}
+
+```
 
 # Roadmap
 
-- Move from symfony/http-foundation to psr6
-- Provide a custom interface for the annotation reader - or should we support many types of configuration ?
-- Untie from Jms serializer
-- Move from array type parameters such as filtervalue[id] to something in compatible with the openapi specs
-- Be able to chose output format: HAL, JsonApi, ...
+- (MUST) Provide a custom interface for the annotation reader
+- (MUST) Move from array type parameters such as filtervalue[id] to something in compatible with the openapi specs
+- (SHOULD) Refactor using properyinfo component
+- (SHOULD) Untie from Jms serializer
+- (BONUS) Be able to chose output format: HAL, JsonApi, ...
+- (BONUS) support different types of configuration

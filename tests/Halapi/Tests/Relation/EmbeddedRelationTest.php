@@ -12,8 +12,7 @@ use Doctrine\Common\Annotations\Reader;
 use Halapi\Tests\Fixtures\Entity\BlueCar;
 use Halapi\Tests\Fixtures\Entity\Door;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Class EmbeddedRelationTest.
@@ -30,7 +29,7 @@ class EmbeddedRelationTest extends TestCase
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    private $requestStack;
+    private $request;
 
     /**
      * Set up mocks.
@@ -38,7 +37,7 @@ class EmbeddedRelationTest extends TestCase
     public function setUp()
     {
         $this->annotationReader = $this->createMock(Reader::class);
-        $this->requestStack = $this->createMock(RequestStack::class);
+        $this->request = $this->createMock(ServerRequestInterface::class);
     }
 
     /**
@@ -48,7 +47,7 @@ class EmbeddedRelationTest extends TestCase
     {
         $embeddedRelation = new EmbeddedRelation(
             $this->annotationReader,
-            $this->requestStack
+            $this->request
         );
 
         $this->assertInstanceOf(RelationInterface::class, $embeddedRelation);
@@ -61,7 +60,7 @@ class EmbeddedRelationTest extends TestCase
     {
         $embeddedRelation = new EmbeddedRelation(
             $this->annotationReader,
-            $this->requestStack
+            $this->request
         );
 
         $this->assertEquals('_embedded', $embeddedRelation->getName());
@@ -72,10 +71,8 @@ class EmbeddedRelationTest extends TestCase
      */
     public function testGetRelation()
     {
-        $masterRequestMock = $this->createMock(Request::class);
-        $masterRequestMock->expects($this->at(0))->method('get')->with('embed')->willReturn(['doors']);
-        $masterRequestMock->expects($this->at(0))->method('get')->with('embed')->willReturn('wrong');
-        $this->requestStack->method('getMasterRequest')->willReturn($masterRequestMock);
+        $this->request->expects($this->at(0))->method('getQueryParams')->willReturn(['embed' => ['doors']]);
+        $this->request->expects($this->at(1))->method('getQueryParams')->willReturn(['embed' => 'wrong']);
 
         // Are the properties of a bluecar embedable ?
         $reflectionClass = new \ReflectionClass(new BlueCar());
@@ -108,7 +105,7 @@ class EmbeddedRelationTest extends TestCase
 
         $embeddedRelation = new EmbeddedRelation(
             $this->annotationReader,
-            $this->requestStack
+            $this->request
         );
 
         $leftDoor = new Door();
