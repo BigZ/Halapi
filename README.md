@@ -34,7 +34,7 @@ https://github.com/BigZ/promote-api
 use Doctrine\Common\Annotations\Reader;
 use Halapi\ObjectManager\ObjectManagerInterface;
 use Halapi\UrlGenerator\UrlGeneratorInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Psr\Http\Message\ServerRequestInterface;
 
 class EntityController()
 {
@@ -45,18 +45,18 @@ class EntityController()
         UrlGeneratorInterface $router,
         Reader $annotationReader,
         ObjectManagerInterface $entityManager,
-        RequestStack $requestStack
+        PagerInterface $pager
     ) {
         $this->router = $router;
         $this->annotationReader = $annotationReader;
         $this->entityManager = $entityManager;
-        $this->requestStack = $requestStack;
+        $this->pager = $pager;
     }
 
     /**
      * Accessed by the /entities/{id} route
      */
-    public function getHalFormattedEntity(Entity $entity)
+    public function getHalFormattedEntity(ServerRequestInterface $request, Entity $entity)
     {
         $linksRelation = new LinksRelation(
             $this->router,
@@ -67,7 +67,7 @@ class EntityController()
             $this->router,
             $this->annotationReader,
             $this->entityManager,
-            $this->requestStack
+            $request
         );
 
         $relationFactory = new RelationFactory([$linksRelation, $embeddedRelation]);
@@ -79,19 +79,19 @@ class EntityController()
     /**
      * Accessed by the /entities
      */
-    public function getHalFormattedCollection($entityName)
+    public function getHalFormattedCollection(ServerRequestInterface $request, $entityName)
     {
         $linksRelation = new LinksRelation(
             $this->router,
             $this->annotationReader,
             $this->entityManager,
-            $this->requestStack
+            $request
         );
         $embeddedRelation = new EmbeddedRelation(
             $this->router,
             $this->annotationReader,
             $this->entityManager,
-            $this->requestStack
+            $request
         );
 
         $relationFactory = new RelationFactory([$linksRelation, $embeddedRelation]);
@@ -100,7 +100,8 @@ class EntityController()
         $paginationFactory = new PaginationFactory(
             $this->router,
             $this->annotationReader,
-            $this->entityManager
+            $this->entityManager,
+            $this->pager
         );
         $paginatedRepresentation = $paginationFactory->getRepresentation($entityName);
 

@@ -5,8 +5,6 @@ namespace Halapi\Factory;
 use Halapi\ObjectManager\ObjectManagerInterface;
 use Halapi\Pager\PagerInterface;
 use Halapi\Representation\PaginatedRepresentation;
-use Pagerfanta\Adapter\AdapterInterface;
-use Pagerfanta\Pagerfanta;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Halapi\UrlGenerator\UrlGeneratorInterface;
 use Psr\Http\Message\ServerRequestInterface;
