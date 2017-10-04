@@ -193,6 +193,7 @@ class Artist
 
 # Roadmap
 
+- (MUST) Provide another way to get the paginated route of an entity. It is actually based on a convention (get_entityname) and that should be configurable by let's say an annotation on the controller or the entity.
 - (MUST) Provide a custom interface for the annotation reader
 - (MUST) Move from array type parameters such as filtervalue[id] to something in compatible with the openapi specs
 - (SHOULD) Refactor using properyinfo component

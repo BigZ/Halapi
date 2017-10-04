@@ -7,6 +7,7 @@ use Halapi\Representation\PaginatedRepresentation;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\GenericSerializationVisitor;
 use PHPUnit\Framework\TestCase;
+use JMS\Serializer\EventDispatcher\Events;
 
 /**
  * Class JsonEventSubscriberTest.
@@ -16,7 +17,19 @@ use PHPUnit\Framework\TestCase;
 class JsonEventSubscriberTest extends TestCase
 {
     /**
-     * Test that a paginatedrepresentation does not get extra fields on serialization.
+     * Test that we subscribe to the proper event
+     */
+    public function testSubscribedEvents()
+    {
+        in_array([
+            'event' => Events::POST_SERIALIZE,
+            'format' => 'json',
+            'method' => 'onPostSerialize',
+        ], JsonEventSubscriber::getSubscribedEvents());
+    }
+
+    /**
+     * Test that a PaginatedRepresentation does not get extra fields on serialization.
      */
     public function testDontSerialiazePaginatedRepresentation()
     {
@@ -32,7 +45,7 @@ class JsonEventSubscriberTest extends TestCase
     }
 
     /**
-     * Test that relation datas are added to serialized objects.
+     * Test that relation data are added to serialized objects.
      */
     public function testAddRelationDataOnSerialization()
     {

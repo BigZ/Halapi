@@ -3,6 +3,7 @@
 namespace Halapi\Factory;
 
 use Halapi\ObjectManager\ObjectManagerInterface;
+use Halapi\Pager\PagerInterface;
 use Halapi\Representation\PaginatedRepresentation;
 use Pagerfanta\Adapter\AdapterInterface;
 use Pagerfanta\Pagerfanta;
@@ -33,9 +34,9 @@ class PaginationFactory
     private $request;
 
     /**
-     * @var string
+     * @var PagerInterface
      */
-    private $pagerStrategy;
+    private $pager;
 
     /**
      * PaginationFactory constructor.
@@ -43,18 +44,18 @@ class PaginationFactory
      * @param UrlGeneratorInterface  $urlGenerator
      * @param ObjectManagerInterface $objectManager
      * @param ServerRequestInterface $request
-     * @param string                 $pagerStrategy
+     * @param PagerInterface         $pager
      */
     public function __construct(
         UrlGeneratorInterface $urlGenerator,
         ObjectManagerInterface $objectManager,
         ServerRequestInterface $request,
-        $pagerStrategy = 'DoctrineORM'
+        PagerInterface $pager
     ) {
         $this->urlGenerator = $urlGenerator;
         $this->objectManager = $objectManager;
         $this->request = $request;
-        $this->setPagerStrategy($pagerStrategy);
+        $this->pager = $pager;
     }
 
     /**
@@ -70,10 +71,9 @@ class PaginationFactory
         list($page, $limit, $sorting, $filterValues, $filerOperators) = array_values($this->addPaginationParams());
         $results = $this->objectManager->findAllSorted($className, $sorting, $filterValues, $filerOperators);
 
-        $pagerAdapter = $this->getPagerAdapter($results);
-        $pager = new Pagerfanta($pagerAdapter);
-        $pager->setMaxPerPage($limit);
-        $pager->setCurrentPage($page);
+        $this->pager->setResults($results);
+        $this->pager->setMaxPerPage($limit);
+        $this->pager->setCurrentPage($page);
 
         return new PaginatedRepresentation(
             $page,
@@ -84,41 +84,13 @@ class PaginationFactory
                 'next' => $this->getPaginatedRoute(
                     $shortName,
                     $limit,
-                    $page < $pager->getNbPages() ? $page + 1 : $pager->getNbPages(),
+                    $page < $this->pager->getPageCount() ? $page + 1 : $this->pager->getPageCount(),
                     $sorting
                 ),
-                'last' => $this->getPaginatedRoute($shortName, $limit, $pager->getNbPages(), $sorting),
+                'last' => $this->getPaginatedRoute($shortName, $limit, $this->pager->getPageCount(), $sorting),
             ],
-            (array) $pager->getCurrentPageResults()
+            (array) $this->pager->getCurrentPageResults()
         );
-    }
-
-    /**
-     * @param string $pagerStrategy
-     */
-    public function setPagerStrategy($pagerStrategy)
-    {
-        if (!class_exists('Pagerfanta\Adapter\\'.$pagerStrategy.'Adapter')) {
-            throw new \InvalidArgumentException(sprintf(
-                'No adapter named %s found in %s namespace',
-                'Doctrine'.$pagerStrategy.'Adapter',
-                'Pagerfanta\Adapter'
-            ));
-        }
-
-        $this->pagerStrategy = $pagerStrategy;
-    }
-
-    /**
-     * @param array $results
-     *
-     * @return AdapterInterface
-     */
-    private function getPagerAdapter($results)
-    {
-        $adapterClassName = 'Pagerfanta\Adapter\\'.$this->pagerStrategy.'Adapter';
-
-        return new $adapterClassName(...$results);
     }
 
     /**

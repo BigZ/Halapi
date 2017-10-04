@@ -30,6 +30,19 @@ class BlueCar
     private $engine;
 
     /**
+     * BlueCar constructor.
+     * @param int|null             $id
+     * @param ArrayCollection|null $doors
+     * @param Engine|null          $engine
+     */
+    public function __construct($id = null, $doors = null, $engine = null)
+    {
+        $this->setId($id);
+        $this->setDoors($doors);
+        $this->setEngine($engine);
+    }
+
+    /**
      * @return int
      */
     public function getId()
@@ -56,7 +69,7 @@ class BlueCar
     /**
      * @param ArrayCollection $doors
      */
-    public function setDoors(ArrayCollection $doors)
+    public function setDoors(ArrayCollection $doors = null)
     {
         $this->doors = $doors;
     }
@@ -72,7 +85,7 @@ class BlueCar
     /**
      * @param Engine $engine
      */
-    public function setEngine(Engine $engine)
+    public function setEngine(Engine $engine = null)
     {
         $this->engine = $engine;
     }
