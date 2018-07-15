@@ -1,9 +1,10 @@
 <?php
 
-namespace Halapi\Relation;
+namespace Halapi\AnnotationReader;
 
 use Halapi\Annotation\Embeddable;
 use Doctrine\Common\Annotations\Reader;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 
 /**
  * Reads annotations.
@@ -27,13 +28,16 @@ class DoctrineAnnotationReader implements AnnotationReaderInterface
     }
 
     /**
-     * @param \ReflectionProperty $property
+     * Get the route name of a relationship.
      *
-     * @return mixed
+     * @param \ReflectionProperty $property
+     * @param string              $targetClass
+     *
+     * @return string
      *
      * @throws \ReflectionException
      */
-    public function getAssociationRouteName(\ReflectionProperty $property)
+    public function getAssociationRouteName(\ReflectionProperty $property, $targetClass)
     {
         /**
          * @var Embeddable
@@ -44,9 +48,7 @@ class DoctrineAnnotationReader implements AnnotationReaderInterface
             return $annotation->getRouteName();
         }
 
-        return $this->getResourceRouteName(new \ReflectionClass(
-            $this->classMetadata->getAssociationTargetClass($property->getName())
-        ));
+        return $this->getResourceRouteName(new \ReflectionClass($targetClass));
     }
 
     /**

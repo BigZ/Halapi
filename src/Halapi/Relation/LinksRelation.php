@@ -90,17 +90,17 @@ class LinksRelation implements RelationInterface
     }
 
     /**
-     * @param \ReflectionProperty $property
-     * @param $relationContent
-     * @return mixed
-     * @throws \ReflectionException
+     * @inheritdoc
      */
     private function getRelationLink(\ReflectionProperty $property, $relationContent)
     {
         $relationReflection = new \ReflectionClass($relationContent);
         if ($this->classMetadata->hasAssociation($property->getName())) {
             return $this->urlGenerator->generate(
-                $this->annotationReader->getAssociationRouteName($property),
+                $this->annotationReader->getAssociationRouteName(
+                    $property,
+                    $this->classMetadata->getAssociationTargetClass($property->getName())
+                ),
                 [
                     strtolower($relationReflection->getShortName()) => $this->objectManager->getIdentifier($relationContent),
                 ]
@@ -134,8 +134,8 @@ class LinksRelation implements RelationInterface
     /**
      * @param \ReflectionProperty $property
      * @param $relationContent
-     * @return array|mixed
-     * @throws \ReflectionException
+     *
+     * @return array
      */
     private function getRelationLinks(\ReflectionProperty $property, $relationContent)
     {

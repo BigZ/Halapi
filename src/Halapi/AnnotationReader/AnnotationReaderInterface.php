@@ -13,10 +13,11 @@ interface AnnotationReaderInterface
      * Return the configured route name for an embeddable relation.
      *
      * @param \ReflectionProperty $property
+     * @param string              $targetClass
      *
      * @return string
      */
-    public function getAssociationRouteName(\ReflectionProperty $property);
+    public function getAssociationRouteName(\ReflectionProperty $property, $targetClass);
 
     /**
      * Return the configured route name for a resource, or get_*entityShortName* by default.
