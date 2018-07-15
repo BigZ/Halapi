@@ -11,12 +11,12 @@ use Halapi\ObjectManager\DoctrineOrmObjectManager;
 use Halapi\ObjectManager\ObjectManagerInterface;
 use Halapi\Relation\LinksRelation;
 use Halapi\Relation\RelationInterface;
-use Doctrine\Common\Annotations\Reader;
 use Halapi\Tests\Fixtures\Entity\BlueCar;
 use Halapi\Tests\Fixtures\Entity\Door;
 use Halapi\Tests\Fixtures\Entity\Engine;
 use PHPUnit\Framework\TestCase;
 use Halapi\UrlGenerator\UrlGeneratorInterface;
+use Halapi\AnnotationReader\AnnotationReaderInterface;
 
 /**
  * Class LinksRelationTest.
@@ -46,7 +46,7 @@ class LinksRelationTest extends TestCase
     public function setUp()
     {
         $this->urlGenerator = $this->createMock(UrlGeneratorInterface::class);
-        $this->annotationReader = $this->createMock(Reader::class);
+        $this->annotationReader = $this->createMock(AnnotationReaderInterface::class);
         $this->objectManager = $this->createMock(DoctrineOrmObjectManager::class);
     }
 
@@ -112,7 +112,6 @@ class LinksRelationTest extends TestCase
             ->method('generate')
             ->willReturnCallback(function ($routeName, $parameters) {
                 $route = explode('_', $routeName);
-                var_dump($route, $parameters);
 
                 return '/'.$route[1].'s/'.$parameters[$route[1]];
             })
@@ -122,48 +121,43 @@ class LinksRelationTest extends TestCase
         $blueCarReflectionClass = new \ReflectionClass(new BlueCar());
         $engineReflectionClass = new \ReflectionClass(new Engine());
         $this->annotationReader
-            ->method('getPropertyAnnotation')
-            ->willReturnCallback(function ($property, $class) use ($blueCarReflectionClass) {
-                if (Embeddable::class === $class) {
-                    switch ($property) {
-                        case $blueCarReflectionClass->getProperty('doors'):
-                            $embedabbleMock = $this->createMock(Embeddable::class);
-                            $embedabbleMock->method('getRouteName')->willReturn('customget_door');
-
-                            return $embedabbleMock;
-                        case $blueCarReflectionClass->getProperty('engine'):
-                            $embedabbleMock = $this->createMock(Embeddable::class);
-                            $embedabbleMock->method('getRouteName')->willReturn(null);
-
-                            return $embedabbleMock;
-                    }
+            ->method('getAssociationRouteName')
+            ->willReturnCallback(function ($property) use ($blueCarReflectionClass) {
+                switch ($property) {
+                    case $blueCarReflectionClass->getProperty('doors'):
+                        return 'customget_door';
+                    case $blueCarReflectionClass->getProperty('engine'):
+                        return 'get_engine';
                 }
 
                 return;
             })
         ;
         $this->annotationReader
-            ->method('getClassAnnotation')
-            ->willReturnCallback(function ($resource, $class) use ($blueCarReflectionClass, $engineReflectionClass) {
-                if (Embeddable::class === $class) {
-                    switch ($resource) {
-                        case $blueCarReflectionClass:
-                            $embedabbleMock = $this->createMock(Embeddable::class);
-                            $embedabbleMock->method('getRouteName')->willReturn('customget_bluecar');
-
-                            return $embedabbleMock;
-                        case $engineReflectionClass:
-                            $embedabbleMock = $this->createMock(Embeddable::class);
-                            $embedabbleMock->method('getRouteName')->willReturn(null);
-
-                            return $embedabbleMock;
-                    }
+            ->method('getResourceRouteName')
+            ->willReturnCallback(function ($resource) use ($blueCarReflectionClass, $engineReflectionClass) {
+                switch ($resource) {
+                    case $blueCarReflectionClass:
+                        return 'customget_bluecar';
+                    case $engineReflectionClass:
+                        return 'get_engine';
                 }
 
                 return;
             })
         ;
 
+        $this->annotationReader
+            ->method('isEmbeddable')
+            ->willReturnCallback(function ($property) {
+                switch ($property->getName()) {
+                    case 'id':
+                        return false;
+                }
+
+                return true;
+            })
+        ;
         $linkRelation = new LinksRelation(
             $this->annotationReader,
             $this->urlGenerator,

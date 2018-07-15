@@ -16,6 +16,11 @@ class Embeddable
     private $routeName;
 
     /**
+     * @var string
+     */
+    private $collectionRouteName;
+
+    /**
      * Constructor.
      *
      * @param array $data An array of key/value parameters
@@ -53,4 +58,21 @@ class Embeddable
     {
         $this->routeName = $routeName;
     }
+
+    /**
+     * @return string
+     */
+    public function getCollectionRouteName()
+    {
+        return $this->collectionRouteName;
+    }
+
+    /**
+     * @param string $collectionRouteName
+     */
+    public function setCollectionRouteName($collectionRouteName)
+    {
+        $this->collectionRouteName = $collectionRouteName;
+    }
+
 }

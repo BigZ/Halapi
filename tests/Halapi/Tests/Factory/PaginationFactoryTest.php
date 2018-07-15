@@ -3,6 +3,7 @@
 namespace Halapi\Tests\Factory;
 
 use Doctrine\ORM\Query;
+use Halapi\AnnotationReader\AnnotationReaderInterface;
 use Halapi\ObjectManager\ObjectManagerInterface;
 use Halapi\Pager\PagerInterface;
 use Halapi\Tests\Fixtures\Entity\BlueCar;
@@ -38,6 +39,11 @@ class PaginationFactoryTest extends TestCase
     private $pager;
 
     /**
+     * @var \PHPUnit_Framework_MockObject_MockObject|AnnotationReaderInterface
+     */
+    private $annotationReader;
+
+    /**
      * Set up mocks.
      */
     public function setUp()
@@ -46,6 +52,7 @@ class PaginationFactoryTest extends TestCase
         $this->objectManager = $this->createMock(ObjectManagerInterface::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
         $this->pager = $this->createMock(PagerInterface::class);
+        $this->annotationReader = $this->createMock(AnnotationReaderInterface::class);
     }
 
     /**
@@ -70,11 +77,14 @@ class PaginationFactoryTest extends TestCase
             return $name.'?page='.$params['page'].'&limit='.$params['limit'];
         });
 
+        $this->annotationReader->method('getResourceCollectionRouteName')->willReturn('get_bluecars');
+
         $paginationFactory = new PaginationFactory(
             $this->urlGenerator,
             $this->objectManager,
             $this->request,
-            $this->pager
+            $this->pager,
+            $this->annotationReader
         );
         $representation = $paginationFactory->getRepresentation(BlueCar::class);
 

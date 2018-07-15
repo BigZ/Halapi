@@ -31,7 +31,7 @@ https://github.com/BigZ/promote-api
 # Example
 
 ```
-use Doctrine\Common\Annotations\Reader;
+use Halapi\AnnotationReader\AnnotationReaderInterface;
 use Halapi\ObjectManager\ObjectManagerInterface;
 use Halapi\UrlGenerator\UrlGeneratorInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -43,7 +43,7 @@ class EntityController()
      */
     public function __construct(
         UrlGeneratorInterface $router,
-        Reader $annotationReader,
+        AnnotationReaderInterface $annotationReader,
         ObjectManagerInterface $entityManager,
         PagerInterface $pager
     ) {
@@ -59,14 +59,12 @@ class EntityController()
     public function getHalFormattedEntity(ServerRequestInterface $request, Entity $entity)
     {
         $linksRelation = new LinksRelation(
-            $this->router,
             $this->annotationReader,
+            $this->router,
             $this->entityManager,
         );
         $embeddedRelation = new EmbeddedRelation(
-            $this->router,
             $this->annotationReader,
-            $this->entityManager,
             $request
         );
 
@@ -200,9 +198,9 @@ class Artist
 
 # Roadmap
 
-- (MUST) Provide a custom interface for the annotation reader
-- (MUST) Move from array type parameters such as filtervalue[id] to something in compatible with the openapi specs
-- (SHOULD) Refactor using properyinfo component
+- (MUST) be compliant with the JSONAPI specs for including, filtering & sorting in the Query String
+- (MUST) Be able to chose output format: HAL, JsonApi, ...
+- (SHOULD) Refactor using propertyinfo component
+- (SHOULD) USE doctrine/reflection instead of doctrine/common
 - (SHOULD) Untie from Jms serializer
-- (BONUS) Be able to chose output format: HAL, JsonApi, ...
 - (BONUS) support different types of configuration

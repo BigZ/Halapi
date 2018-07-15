@@ -4,8 +4,7 @@ namespace Halapi\Relation;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-use Doctrine\Common\Annotations\Reader;
-use Halapi\Annotation\Embeddable;
+use Halapi\AnnotationReader\AnnotationReaderInterface;
 use Halapi\ObjectManager\ObjectManagerInterface;
 use Halapi\UrlGenerator\UrlGeneratorInterface;
 
@@ -14,7 +13,7 @@ use Halapi\UrlGenerator\UrlGeneratorInterface;
  *
  * @author Romain Richard
  */
-class LinksRelation extends AbstractRelation implements RelationInterface
+class LinksRelation implements RelationInterface
 {
     /**
      * @var UrlGeneratorInterface
@@ -37,19 +36,23 @@ class LinksRelation extends AbstractRelation implements RelationInterface
     private $reflectionClass;
 
     /**
-     * AbstractRelation constructor.
-     *
-     * @param Reader                 $annotationReader
-     * @param UrlGeneratorInterface  $urlGenerator
+     * @var AnnotationReaderInterface
+     */
+    private $annotationReader;
+
+    /**
+     * LinksRelation constructor.
+     * @param AnnotationReaderInterface $annotationReader
+     * @param UrlGeneratorInterface $urlGenerator
      * @param ObjectManagerInterface $objectManager
      */
     public function __construct(
-        Reader $annotationReader,
+        AnnotationReaderInterface $annotationReader,
         UrlGeneratorInterface $urlGenerator,
         ObjectManagerInterface $objectManager
     ) {
-        $this->urlGenerator = $urlGenerator;
         $this->annotationReader = $annotationReader;
+        $this->urlGenerator = $urlGenerator;
         $this->objectManager = $objectManager;
     }
 
@@ -71,7 +74,7 @@ class LinksRelation extends AbstractRelation implements RelationInterface
         $links = $this->getSelfLink($resource);
 
         foreach ($this->reflectionClass->getProperties() as $property) {
-            if ($this->isEmbeddable($property) && $property->getName()) {
+            if ($this->annotationReader->isEmbeddable($property) && $property->getName()) {
                 $propertyName = $property->getName();
                 $relationContent = $resource->{'get'.ucfirst($propertyName)}();
                 if ($relationContent) {
@@ -95,7 +98,7 @@ class LinksRelation extends AbstractRelation implements RelationInterface
         $relationReflection = new \ReflectionClass($relationContent);
         if ($this->classMetadata->hasAssociation($property->getName())) {
             return $this->urlGenerator->generate(
-                $this->getAssociationRouteName($property),
+                $this->annotationReader->getAssociationRouteName($property),
                 [
                     strtolower($relationReflection->getShortName()) =>
                         $this->objectManager->getIdentifier($relationContent),
@@ -119,7 +122,7 @@ class LinksRelation extends AbstractRelation implements RelationInterface
 
         return [
             'self' => $this->urlGenerator->generate(
-                $this->getResourceRouteName($this->reflectionClass),
+                $this->annotationReader->getResourceRouteName($this->reflectionClass),
                 [
                     strtolower($this->reflectionClass->getShortName()) =>
                         $this->objectManager->getIdentifier($resource),
@@ -134,7 +137,7 @@ class LinksRelation extends AbstractRelation implements RelationInterface
      * @param \ReflectionProperty $property
      * @param $relationContent
      *
-     * @return array|void
+     * @return array|string
      */
     private function getRelationLinks(\ReflectionProperty $property, $relationContent)
     {
@@ -148,43 +151,5 @@ class LinksRelation extends AbstractRelation implements RelationInterface
         }
 
         return $this->getRelationLink($property, $relationContent);
-    }
-
-    /**
-     * Return the configured route name for an embeddable relation.
-     *
-     * @param \ReflectionProperty $property
-     *
-     * @return string
-     */
-    private function getAssociationRouteName(\ReflectionProperty $property)
-    {
-        $annotation = $this->annotationReader->getPropertyAnnotation($property, Embeddable::class);
-
-        if ($annotation && $annotation->getRouteName()) {
-            return $annotation->getRouteName();
-        }
-
-        return $this->getResourceRouteName(new \ReflectionClass(
-            $this->classMetadata->getAssociationTargetClass($property->getName())
-        ));
-    }
-
-    /**
-     * Return the configured route name for a resource, or get_*entityShortName* by default.
-     *
-     * @param \ReflectionClass $resource
-     *
-     * @return string
-     */
-    private function getResourceRouteName(\ReflectionClass $resource)
-    {
-        $annotation = $this->annotationReader->getClassAnnotation($resource, Embeddable::class);
-
-        if ($annotation && $annotation->getRouteName()) {
-            return $annotation->getRouteName();
-        }
-
-        return 'get_'.strtolower($resource->getShortName());
     }
 }

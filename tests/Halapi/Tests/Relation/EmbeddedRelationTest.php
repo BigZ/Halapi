@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping\OneToMany;
 use Halapi\Annotation\Embeddable;
 use Halapi\Relation\EmbeddedRelation;
 use Halapi\Relation\RelationInterface;
-use Doctrine\Common\Annotations\Reader;
+use Halapi\AnnotationReader\AnnotationReaderInterface;
 use Halapi\Tests\Fixtures\Entity\BlueCar;
 use Halapi\Tests\Fixtures\Entity\Door;
 use PHPUnit\Framework\TestCase;
@@ -36,7 +36,7 @@ class EmbeddedRelationTest extends TestCase
      */
     public function setUp()
     {
-        $this->annotationReader = $this->createMock(Reader::class);
+        $this->annotationReader = $this->createMock(AnnotationReaderInterface::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
     }
 
@@ -78,30 +78,23 @@ class EmbeddedRelationTest extends TestCase
         $reflectionClass = new \ReflectionClass(new BlueCar());
         $this->annotationReader
             ->expects($this->at(0))
-            ->method('getPropertyAnnotation')
+            ->method('isEmbeddable')
             ->with(
-                $reflectionClass->getProperty('id'),
-                Embeddable::class
+                $reflectionClass->getProperty('id')
             )
-            ->willReturn(null)
+            ->willReturn(false)
         ;
         $this->annotationReader
             ->expects($this->at(1))
-            ->method('getPropertyAnnotation')
+            ->method('isEmbeddable')
             ->with(
-                $reflectionClass->getProperty('doors'),
-                Embeddable::class
+                $reflectionClass->getProperty('doors')
             )
-            ->willReturn(1)
+            ->willReturn(true)
         ;
 
         $doorsRelationAnnotation = new OneToMany();
         $doorsRelationAnnotation->targetEntity = Door::class;
-        $this->annotationReader
-            ->method('getPropertyAnnotations')
-            ->with($reflectionClass->getProperty('doors'))
-            ->willReturn([new Annotation([]), $doorsRelationAnnotation])
-        ;
 
         $embeddedRelation = new EmbeddedRelation(
             $this->annotationReader,

@@ -8,6 +8,7 @@ use Halapi\Representation\PaginatedRepresentation;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Halapi\UrlGenerator\UrlGeneratorInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Halapi\AnnotationReader\AnnotationReaderInterface;
 
 /**
  * Class PaginationFactory.
@@ -37,23 +38,30 @@ class PaginationFactory
     private $pager;
 
     /**
+     * @var AnnotationReaderInterface
+     */
+    protected $annotationReader;
+
+    /**
      * PaginationFactory constructor.
-     *
-     * @param UrlGeneratorInterface  $urlGenerator
+     * @param UrlGeneratorInterface $urlGenerator
      * @param ObjectManagerInterface $objectManager
      * @param ServerRequestInterface $request
-     * @param PagerInterface         $pager
+     * @param PagerInterface $pager
+     * @param AnnotationReaderInterface $annotationReader
      */
     public function __construct(
         UrlGeneratorInterface $urlGenerator,
         ObjectManagerInterface $objectManager,
         ServerRequestInterface $request,
-        PagerInterface $pager
+        PagerInterface $pager,
+        AnnotationReaderInterface $annotationReader
     ) {
         $this->urlGenerator = $urlGenerator;
         $this->objectManager = $objectManager;
         $this->request = $request;
         $this->pager = $pager;
+        $this->annotationReader = $annotationReader;
     }
 
     /**
@@ -65,7 +73,6 @@ class PaginationFactory
      */
     public function getRepresentation($className)
     {
-        $shortName = (new \ReflectionClass($className))->getShortName();
         list($page, $limit, $sorting, $filterValues, $filerOperators) = array_values($this->addPaginationParams());
         $results = $this->objectManager->findAllSorted($className, $sorting, $filterValues, $filerOperators);
 
@@ -77,15 +84,15 @@ class PaginationFactory
             $page,
             $limit,
             [
-                'self' => $this->getPaginatedRoute($shortName, $limit, $page, $sorting),
-                'first' => $this->getPaginatedRoute($shortName, $limit, 1, $sorting),
+                'self' => $this->getPaginatedRoute($className, $limit, $page, $sorting),
+                'first' => $this->getPaginatedRoute($className, $limit, 1, $sorting),
                 'next' => $this->getPaginatedRoute(
-                    $shortName,
+                    $className,
                     $limit,
                     $page < $this->pager->getPageCount() ? $page + 1 : $this->pager->getPageCount(),
                     $sorting
                 ),
-                'last' => $this->getPaginatedRoute($shortName, $limit, $this->pager->getPageCount(), $sorting),
+                'last' => $this->getPaginatedRoute($className, $limit, $this->pager->getPageCount(), $sorting),
             ],
             (array) $this->pager->getCurrentPageResults()
         );
@@ -138,7 +145,7 @@ class PaginationFactory
     private function getPaginatedRoute($name, $limit, $page, $sorting)
     {
         return $this->urlGenerator->generate(
-            'get_'.strtolower($name).'s',
+            $this->annotationReader->getResourceCollectionRouteName(new \ReflectionClass($name)),
             [
                 'sorting' => $sorting,
                 'page' => $page,

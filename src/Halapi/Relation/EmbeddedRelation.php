@@ -2,7 +2,7 @@
 
 namespace Halapi\Relation;
 
-use Doctrine\Common\Annotations\Reader;
+use Halapi\AnnotationReader\AnnotationReaderInterface;
 use JMS\Serializer\SerializerBuilder;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -11,7 +11,7 @@ use Psr\Http\Message\ServerRequestInterface;
  *
  * @author Romain Richard
  */
-class EmbeddedRelation extends AbstractRelation implements RelationInterface
+class EmbeddedRelation implements RelationInterface
 {
     /**
      * @var ServerRequestInterface
@@ -24,13 +24,18 @@ class EmbeddedRelation extends AbstractRelation implements RelationInterface
     private $serializer;
 
     /**
+     * @var AnnotationReaderInterface
+     */
+    private $annotationReader;
+
+    /**
      * EmbeddedRelation constructor.
      *
-     * @param Reader                 $annotationReader
-     * @param ServerRequestInterface $request
+     * @param AnnotationReaderInterface $annotationReader
+     * @param ServerRequestInterface    $request
      */
     public function __construct(
-        Reader $annotationReader,
+        AnnotationReaderInterface $annotationReader,
         ServerRequestInterface $request
     ) {
         $this->annotationReader = $annotationReader;
@@ -58,7 +63,10 @@ class EmbeddedRelation extends AbstractRelation implements RelationInterface
         foreach ($reflectionClass->getProperties() as $property) {
             $propertyName = $property->getName();
 
-            if ($this->isEmbeddable($property) && $this->isEmbeddedRequested($propertyName, $requestedEmbedded)) {
+            if (
+                $this->annotationReader->isEmbeddable($property)
+                && $this->isEmbeddedRequested($propertyName, $requestedEmbedded)
+            ) {
                 $embedded[$property->getName()] = $this->getEmbeddedContent($resource, $property);
             }
         }
