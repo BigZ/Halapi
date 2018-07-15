@@ -3,7 +3,8 @@
 namespace Halapi\Pager;
 
 /**
- * Class PagerInterface
+ * Class PagerInterface.
+ *
  * @author Romain Richard
  */
 interface PagerInterface
@@ -28,6 +29,7 @@ interface PagerInterface
      * depending on which adapter you use.
      *
      * @param mixed $results
+     *
      * @return mixed
      */
     public function setResults($results);
@@ -36,7 +38,6 @@ interface PagerInterface
      * Set the maximum number of results per page (aka limit).
      *
      * @param int $max
-     * @return void
      */
     public function setMaxPerPage($max);
 
@@ -44,7 +45,6 @@ interface PagerInterface
      * Set the page to display.
      *
      * @param int $page
-     * @return void
      */
     public function setCurrentPage($page);
 }

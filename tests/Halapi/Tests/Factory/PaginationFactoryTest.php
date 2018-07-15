@@ -2,7 +2,6 @@
 
 namespace Halapi\Tests\Factory;
 
-use Doctrine\ORM\Query;
 use Halapi\AnnotationReader\AnnotationReaderInterface;
 use Halapi\ObjectManager\ObjectManagerInterface;
 use Halapi\Pager\PagerInterface;
@@ -13,7 +12,8 @@ use Halapi\Factory\PaginationFactory;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
- * Class PaginationFactoryTest
+ * Class PaginationFactoryTest.
+ *
  * @author Romain Richard
  */
 class PaginationFactoryTest extends TestCase

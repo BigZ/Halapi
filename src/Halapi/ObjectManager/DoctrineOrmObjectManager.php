@@ -5,7 +5,8 @@ namespace Halapi\ObjectManager;
 use Doctrine\Common\Persistence\ObjectManager;
 
 /**
- * Interface ObjectManagerInterface
+ * Interface ObjectManagerInterface.
+ *
  * @author Romain Richard
  */
 class DoctrineOrmObjectManager implements ObjectManagerInterface
@@ -17,6 +18,7 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
 
     /**
      * DoctrineOrmObjectManager constructor.
+     *
      * @param ObjectManager $objectManager
      */
     public function __construct(ObjectManager $objectManager)
@@ -26,6 +28,7 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
 
     /**
      * @param object $resource
+     *
      * @return mixed
      */
     public function getIdentifierName($resource)
@@ -37,6 +40,7 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
 
     /**
      * @param object $resource
+     *
      * @return mixed
      */
     public function getIdentifier($resource)
@@ -57,6 +61,7 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
 
     /**
      * @param string $className
+     *
      * @return \Doctrine\Common\Persistence\Mapping\ClassMetadata
      */
     public function getClassMetadata($className)
@@ -85,7 +90,7 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
 
             foreach ($fields as $field) {
                 if (isset($sorting[$field])) {
-                    $direction = ($sorting[$field] === 'asc') ? 'asc' : 'desc';
+                    $direction = ('asc' === $sorting[$field]) ? 'asc' : 'desc';
                     $queryBuilder->addOrderBy('e.'.$field, $direction);
                 }
 

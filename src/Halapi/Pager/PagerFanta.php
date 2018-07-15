@@ -5,7 +5,8 @@ namespace Halapi\Pager;
 use Pagerfanta\Adapter\AdapterInterface;
 
 /**
- * Class PagerFanta
+ * Class PagerFanta.
+ *
  * @author Romain Richard
  */
 class PagerFanta implements PagerInterface
@@ -22,7 +23,9 @@ class PagerFanta implements PagerInterface
 
     /**
      * PagerFanta constructor.
+     *
      * @param string $pagerStrategy
+     *
      * @return PagerFanta
      */
     public function __construct($pagerStrategy)
@@ -31,7 +34,8 @@ class PagerFanta implements PagerInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
      * @return array
      */
     public function getCurrentPageResults()
@@ -40,7 +44,7 @@ class PagerFanta implements PagerInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getPageCount()
     {
@@ -48,7 +52,8 @@ class PagerFanta implements PagerInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
      * @param mixed $results
      */
     public function setResults($results)
@@ -58,7 +63,8 @@ class PagerFanta implements PagerInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
      * @param int $max
      */
     public function setMaxPerPage($max)
@@ -67,7 +73,8 @@ class PagerFanta implements PagerInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
      * @param int $page
      */
     public function setCurrentPage($page)
@@ -80,10 +87,11 @@ class PagerFanta implements PagerInterface
      */
     public function setPagerStrategy($pagerStrategy)
     {
-        if (!class_exists('Pagerfanta\Adapter\\'.$pagerStrategy.'Adapter')) {
+        $pagerAdapter = sprintf('%sAdapter', $pagerStrategy);
+        if (!class_exists(sprintf('Pagerfanta\Adapter\\%s', $pagerAdapter))) {
             throw new \InvalidArgumentException(sprintf(
                 'No adapter named %s found in %s namespace',
-                $pagerStrategy.'Adapter',
+                $pagerAdapter,
                 'Pagerfanta\Adapter'
             ));
         }
@@ -98,7 +106,7 @@ class PagerFanta implements PagerInterface
      */
     private function getPagerAdapter($results)
     {
-        $adapterClassName = 'Pagerfanta\Adapter\\'.$this->pagerStrategy.'Adapter';
+        $adapterClassName = sprintf('Pagerfanta\Adapter\\%sAdapter', $this->pagerStrategy);
 
         return new $adapterClassName(...$results);
     }

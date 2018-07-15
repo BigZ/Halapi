@@ -6,7 +6,8 @@ use Halapi\Annotation\Embeddable;
 use Doctrine\Common\Annotations\Reader;
 
 /**
- * Reads annotations
+ * Reads annotations.
+ *
  * @author Romain Richard
  */
 class DoctrineAnnotationReader implements AnnotationReaderInterface
@@ -16,6 +17,10 @@ class DoctrineAnnotationReader implements AnnotationReaderInterface
      */
     protected $annotationReader;
 
+    /**
+     * DoctrineAnnotationReader constructor.
+     * @param Reader $annotationReader
+     */
     public function __construct(Reader $annotationReader)
     {
         $this->annotationReader = $annotationReader;
@@ -23,13 +28,15 @@ class DoctrineAnnotationReader implements AnnotationReaderInterface
 
     /**
      * @param \ReflectionProperty $property
+     *
      * @return mixed
+     *
      * @throws \ReflectionException
      */
-    private function getAssociationRouteName(\ReflectionProperty $property)
+    public function getAssociationRouteName(\ReflectionProperty $property)
     {
         /**
-         * @var $annotation Embeddable
+         * @var Embeddable
          */
         $annotation = $this->annotationReader->getPropertyAnnotation($property, Embeddable::class);
 
@@ -49,10 +56,10 @@ class DoctrineAnnotationReader implements AnnotationReaderInterface
      *
      * @return string
      */
-    private function getResourceRouteName(\ReflectionClass $resource)
+    public function getResourceRouteName(\ReflectionClass $resource)
     {
         /**
-         * @var $annotation Embeddable
+         * @var Embeddable
          */
         $annotation = $this->annotationReader->getClassAnnotation($resource, Embeddable::class);
 
@@ -73,7 +80,7 @@ class DoctrineAnnotationReader implements AnnotationReaderInterface
     public function getResourceCollectionRouteName(\ReflectionClass $resource)
     {
         /**
-         * @var $annotation Embeddable
+         * @var Embeddable
          */
         $annotation = $this->annotationReader->getClassAnnotation($resource, Embeddable::class);
 

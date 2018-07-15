@@ -4,11 +4,7 @@ namespace Halapi\Tests\Relation;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-use Doctrine\Common\Persistence\ObjectManager;
-use Halapi\Annotation\Embeddable;
-use Halapi\ObjectManager\DoctrineObjectManager;
 use Halapi\ObjectManager\DoctrineOrmObjectManager;
-use Halapi\ObjectManager\ObjectManagerInterface;
 use Halapi\Relation\LinksRelation;
 use Halapi\Relation\RelationInterface;
 use Halapi\Tests\Fixtures\Entity\BlueCar;

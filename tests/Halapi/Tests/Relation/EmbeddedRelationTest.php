@@ -2,10 +2,8 @@
 
 namespace Halapi\Tests\Relation;
 
-use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\OneToMany;
-use Halapi\Annotation\Embeddable;
 use Halapi\Relation\EmbeddedRelation;
 use Halapi\Relation\RelationInterface;
 use Halapi\AnnotationReader\AnnotationReaderInterface;

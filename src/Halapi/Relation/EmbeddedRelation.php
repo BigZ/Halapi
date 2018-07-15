@@ -63,8 +63,7 @@ class EmbeddedRelation implements RelationInterface
         foreach ($reflectionClass->getProperties() as $property) {
             $propertyName = $property->getName();
 
-            if (
-                $this->annotationReader->isEmbeddable($property)
+            if ($this->annotationReader->isEmbeddable($property)
                 && $this->isEmbeddedRequested($propertyName, $requestedEmbedded)
             ) {
                 $embedded[$property->getName()] = $this->getEmbeddedContent($resource, $property);

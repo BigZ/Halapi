@@ -42,9 +42,10 @@ class LinksRelation implements RelationInterface
 
     /**
      * LinksRelation constructor.
+     *
      * @param AnnotationReaderInterface $annotationReader
-     * @param UrlGeneratorInterface $urlGenerator
-     * @param ObjectManagerInterface $objectManager
+     * @param UrlGeneratorInterface     $urlGenerator
+     * @param ObjectManagerInterface    $objectManager
      */
     public function __construct(
         AnnotationReaderInterface $annotationReader,
@@ -65,7 +66,9 @@ class LinksRelation implements RelationInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param object $resource
+     * @return array|null|string
+     * @throws \ReflectionException
      */
     public function getRelation($resource)
     {
@@ -88,10 +91,9 @@ class LinksRelation implements RelationInterface
 
     /**
      * @param \ReflectionProperty $property
-     * @param object              $relationContent
-     *
-     * @return string|null
-     *
+     * @param $relationContent
+     * @return mixed
+     * @throws \ReflectionException
      */
     private function getRelationLink(\ReflectionProperty $property, $relationContent)
     {
@@ -100,8 +102,7 @@ class LinksRelation implements RelationInterface
             return $this->urlGenerator->generate(
                 $this->annotationReader->getAssociationRouteName($property),
                 [
-                    strtolower($relationReflection->getShortName()) =>
-                        $this->objectManager->getIdentifier($relationContent),
+                    strtolower($relationReflection->getShortName()) => $this->objectManager->getIdentifier($relationContent),
                 ]
             );
         }
@@ -124,20 +125,17 @@ class LinksRelation implements RelationInterface
             'self' => $this->urlGenerator->generate(
                 $this->annotationReader->getResourceRouteName($this->reflectionClass),
                 [
-                    strtolower($this->reflectionClass->getShortName()) =>
-                        $this->objectManager->getIdentifier($resource),
+                    strtolower($this->reflectionClass->getShortName()) => $this->objectManager->getIdentifier($resource),
                 ]
             ),
         ];
     }
 
     /**
-     * Get the links of a collection.
-     *
      * @param \ReflectionProperty $property
      * @param $relationContent
-     *
-     * @return array|string
+     * @return array|mixed
+     * @throws \ReflectionException
      */
     private function getRelationLinks(\ReflectionProperty $property, $relationContent)
     {

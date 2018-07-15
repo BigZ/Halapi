@@ -6,6 +6,7 @@ namespace Halapi\Annotation;
  * Tell the serializer if a property embeddable in a representation.
  *
  * @Annotation
+ *
  * @Target({"PROPERTY", "CLASS"})
  */
 class Embeddable
@@ -74,5 +75,4 @@ class Embeddable
     {
         $this->collectionRouteName = $collectionRouteName;
     }
-
 }

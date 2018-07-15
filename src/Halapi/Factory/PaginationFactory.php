@@ -44,10 +44,11 @@ class PaginationFactory
 
     /**
      * PaginationFactory constructor.
-     * @param UrlGeneratorInterface $urlGenerator
-     * @param ObjectManagerInterface $objectManager
-     * @param ServerRequestInterface $request
-     * @param PagerInterface $pager
+     *
+     * @param UrlGeneratorInterface     $urlGenerator
+     * @param ObjectManagerInterface    $objectManager
+     * @param ServerRequestInterface    $request
+     * @param PagerInterface            $pager
      * @param AnnotationReaderInterface $annotationReader
      */
     public function __construct(
@@ -66,7 +67,8 @@ class PaginationFactory
 
     /**
      * Get a paginated representation of a collection of entities.
-     * Your repository for the object $className must implement the 'findAllSorted' method
+     * Your repository for the object $className must implement the 'findAllSorted' method.
+     *
      * @param string $className
      *
      * @return PaginatedRepresentation
@@ -133,14 +135,14 @@ class PaginationFactory
     }
 
     /**
-     * Return the url of a resource based on the 'get_entity' route name convention.
+     * @param $name string
+     * @param $limit int
+     * @param $page int
+     * @param $sorting string
      *
-     * @param string $name
-     * @param $limit
-     * @param $page
-     * @param $sorting
+     * @return string|null
      *
-     * @return string
+     * @throws \ReflectionException
      */
     private function getPaginatedRoute($name, $limit, $page, $sorting)
     {

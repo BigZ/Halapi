@@ -3,7 +3,8 @@
 namespace Halapi\AnnotationReader;
 
 /**
- * Reads annotations
+ * Reads annotations.
+ *
  * @author Romain Richard
  */
 interface AnnotationReaderInterface
@@ -38,7 +39,7 @@ interface AnnotationReaderInterface
     /**
      * Does an entity's property have the @embeddable annotation ?
      *
-     * @param $property
+     * @param $property \ReflectionProperty property
      *
      * @return bool
      */

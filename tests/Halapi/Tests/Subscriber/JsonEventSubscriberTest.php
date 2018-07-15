@@ -17,7 +17,7 @@ use JMS\Serializer\EventDispatcher\Events;
 class JsonEventSubscriberTest extends TestCase
 {
     /**
-     * Test that we subscribe to the proper event
+     * Test that we subscribe to the proper event.
      */
     public function testSubscribedEvents()
     {
