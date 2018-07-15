@@ -88,12 +88,13 @@ class DoctrineOrmObjectManager implements ObjectManagerInterface
         } catch (\BadMethodCallException $exception) {
             $queryBuilder = $repository->createQueryBuilder('e');
 
-            foreach ($fields as $field) {
-                if (isset($sorting[$field])) {
-                    $direction = ('asc' === $sorting[$field]) ? 'asc' : 'desc';
-                    $queryBuilder->addOrderBy('e.'.$field, $direction);
+            foreach ($sorting as $name => $direction) {
+                if (in_array($name, $fields)) {
+                    $queryBuilder->addOrderBy('e.' . $name, $direction);
                 }
+            }
 
+            foreach ($fields as $field) {
                 if (isset($filterValues[$field])) {
                     $operator = '=';
 

@@ -75,8 +75,9 @@ class PaginationFactory
      */
     public function getRepresentation($className)
     {
-        list($page, $limit, $sorting, $filterValues, $filerOperators) = array_values($this->addPaginationParams());
-        $results = $this->objectManager->findAllSorted($className, $sorting, $filterValues, $filerOperators);
+        list($page, $limit, $sort, $filters, $filerOperators) = array_values($this->addPaginationParams());
+        $sorting = $this->parseSorting($sort);
+        $results = $this->objectManager->findAllSorted($className, $sorting, $filters, $filerOperators);
 
         $this->pager->setResults($results);
         $this->pager->setMaxPerPage($limit);
@@ -86,15 +87,15 @@ class PaginationFactory
             $page,
             $limit,
             [
-                'self' => $this->getPaginatedRoute($className, $limit, $page, $sorting),
-                'first' => $this->getPaginatedRoute($className, $limit, 1, $sorting),
+                'self' => $this->getPaginatedRoute($className, $limit, $page, $sort),
+                'first' => $this->getPaginatedRoute($className, $limit, 1, $sort),
                 'next' => $this->getPaginatedRoute(
                     $className,
                     $limit,
                     $page < $this->pager->getPageCount() ? $page + 1 : $this->pager->getPageCount(),
-                    $sorting
+                    $sort
                 ),
-                'last' => $this->getPaginatedRoute($className, $limit, $this->pager->getPageCount(), $sorting),
+                'last' => $this->getPaginatedRoute($className, $limit, $this->pager->getPageCount(), $sort),
             ],
             (array) $this->pager->getCurrentPageResults()
         );
@@ -112,15 +113,15 @@ class PaginationFactory
         $resolver->setDefaults(array(
             'page' => '1',
             'limit' => '20',
-            'sorting' => [],
-            'filtervalue' => [],
+            'sort' => null,
+            'filter' => [],
             'filteroperator' => [],
         ));
 
         $resolver->setAllowedTypes('page', ['NULL', 'string']);
         $resolver->setAllowedTypes('limit', ['NULL', 'string']);
-        $resolver->setAllowedTypes('sorting', ['NULL', 'array']);
-        $resolver->setAllowedTypes('filtervalue', ['NULL', 'array']);
+        $resolver->setAllowedTypes('sort', ['NULL', 'string']);
+        $resolver->setAllowedTypes('filter', ['NULL', 'array']);
         $resolver->setAllowedTypes('filteroperator', ['NULL', 'array']);
 
         $queryParams = $this->request->getQueryParams();
@@ -128,8 +129,8 @@ class PaginationFactory
         return $resolver->resolve(array_filter([
             'page' => isset($queryParams['page']) ? $queryParams['page'] : '',
             'limit' => isset($queryParams['limit']) ? $queryParams['limit'] : '',
-            'sorting' => isset($queryParams['sorting']) ? $queryParams['sorting'] : '',
-            'filtervalue' => isset($queryParams['filtervalue']) ? $queryParams['filtervalue'] : '',
+            'sort' => isset($queryParams['sort']) ? $queryParams['sort'] : '',
+            'filter' => isset($queryParams['filter']) ? $queryParams['filter'] : '',
             'filteroperator' => isset($queryParams['filteroperator']) ? $queryParams['filteroperator'] : '',
         ]));
     }
@@ -138,21 +139,45 @@ class PaginationFactory
      * @param $name string
      * @param $limit int
      * @param $page int
-     * @param $sorting string
+     * @param $sort string
      *
      * @return string|null
      *
      * @throws \ReflectionException
      */
-    private function getPaginatedRoute($name, $limit, $page, $sorting)
+    private function getPaginatedRoute($name, $limit, $page, $sort)
     {
         return $this->urlGenerator->generate(
             $this->annotationReader->getResourceCollectionRouteName(new \ReflectionClass($name)),
             [
-                'sorting' => $sorting,
+                'sort' => $sort,
                 'page' => $page,
                 'limit' => $limit,
             ]
         );
+    }
+
+    /**
+     * Parse a jsonapi formatted sorting string to an array.
+     * @param $sort
+     * @return array
+     */
+    private function parseSorting($sort)
+    {
+        $parsed = [];
+
+        if ($sort) {
+            $nameList = explode(',', $sort);
+            foreach ($nameList as $name) {
+                if ('-' === $name[0]) {
+                    $parsed[substr($name, 1, strlen($name))] = 'desc';
+                    continue;
+                }
+
+                $parsed[$name] = 'asc';
+            }
+        }
+
+        return $parsed;
     }
 }

@@ -115,20 +115,20 @@ class EntityController()
 #### Pagination
 A list will give you a paginated ressource, HAL formatted.
 
-`/entities?page=2&limite&sorting[id]=desc`
+`/entities?limit=2&page=2`
 
 #### Filtering
 You can filter out results on specific fields.
 
-`/entities?filtervalue[id]=5&filteroperator[id]=>`
+`/entities?filter[id]=5&filteroperator[id]=>`
 
 Available operators are `>`, `<`, `>=`, `<=`, `=`, `!=`
-
+Default operator is `=`
 
 #### Sorting
 You can sort the result by any property
 
-`/entities?sorting[id]=asc`
+`/entities?sort=-created,title`
 
 ### Entity
 #### Creating new entities
@@ -196,10 +196,11 @@ class Artist
 
 ```
 
-# Roadmap
+# Roadmap to production readyness
 
-- (MUST) be compliant with the JSONAPI specs for including, filtering & sorting in the Query String
 - (MUST) Be able to chose output format: HAL, JsonApi, ...
+- (MUST) Improve coverage
+- (SHOULD) support IN filter operator
 - (SHOULD) Refactor using propertyinfo component
 - (SHOULD) USE doctrine/reflection instead of doctrine/common
 - (SHOULD) Untie from Jms serializer

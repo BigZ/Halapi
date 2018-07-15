@@ -48,7 +48,7 @@ class PagerFanta implements PagerInterface
      */
     public function getPageCount()
     {
-        $this->pager->getNbPages();
+        return $this->pager->getNbPages();
     }
 
     /**
