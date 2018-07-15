@@ -200,6 +200,8 @@ class Artist
 
 - (MUST) Be able to chose output format: HAL, JsonApi, ...
 - (MUST) Improve coverage
+- (SHOULD) Implement sparse fieldset
+- (SHOULD) Implement deep resource inclusion
 - (SHOULD) support IN filter operator
 - (SHOULD) Refactor using propertyinfo component
 - (SHOULD) USE doctrine/reflection instead of doctrine/common

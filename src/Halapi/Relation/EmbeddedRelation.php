@@ -106,6 +106,10 @@ class EmbeddedRelation implements RelationInterface
     {
         $queryParams = $this->request->getQueryParams();
 
-        return isset($queryParams['embed']) && is_array($queryParams['embed']) ? $queryParams['embed'] : [];
+        if (isset($queryParams['include']) && $queryParams['include']) {
+            return explode(',', $queryParams['include']);
+        }
+
+        return [];
     }
 }

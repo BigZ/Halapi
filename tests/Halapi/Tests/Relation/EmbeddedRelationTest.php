@@ -69,8 +69,8 @@ class EmbeddedRelationTest extends TestCase
      */
     public function testGetRelation()
     {
-        $this->request->expects($this->at(0))->method('getQueryParams')->willReturn(['embed' => ['doors']]);
-        $this->request->expects($this->at(1))->method('getQueryParams')->willReturn(['embed' => 'wrong']);
+        $this->request->expects($this->at(0))->method('getQueryParams')->willReturn(['include' => 'doors']);
+        $this->request->expects($this->at(1))->method('getQueryParams')->willReturn(['include' => 'wrong']);
 
         // Are the properties of a bluecar embedable ?
         $reflectionClass = new \ReflectionClass(new BlueCar());
