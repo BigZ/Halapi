@@ -198,12 +198,10 @@ class Artist
 
 # Roadmap to production readyness
 
-- (MUST) Be able to chose output format: HAL, JsonApi, ...
 - (MUST) Improve coverage
-- (SHOULD) Implement sparse fieldset
-- (SHOULD) Implement deep resource inclusion
+- (MUST) Implement sparse fieldset
+- (MUST) Implement deep resource inclusion
 - (SHOULD) support IN filter operator
 - (SHOULD) Refactor using propertyinfo component
 - (SHOULD) USE doctrine/reflection instead of doctrine/common
-- (SHOULD) Untie from Jms serializer
-- (BONUS) support different types of configuration
+- (SHOULD) Be able to serialize to any other hateoas format. Not so easy with jms...
